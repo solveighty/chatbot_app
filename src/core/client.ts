@@ -1,14 +1,14 @@
-import { Client, LocalAuth, Message } from 'whatsapp-web.js';
+import { Client, LocalAuth, Message, MessageMedia } from 'whatsapp-web.js';
 import { ClientOptions } from './types';
 import logger from '../utils/logger';
 
 export class WhatsAppClient {
     private client: Client;
-    private messageHandler: (message: Message) => Promise<string | undefined>;
+    private messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia } | undefined>;
 
     constructor(
         options: ClientOptions,
-        messageHandler: (message: Message) => Promise<string | undefined>
+        messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia } | undefined>
     ) {
         this.client = new Client({
             authStrategy: new LocalAuth(),
@@ -35,8 +35,21 @@ export class WhatsAppClient {
             }
             
             const response = await this.messageHandler(message);
+            
             if (response) {
-                await message.reply(response);
+                try {
+                    if (typeof response === 'string') {
+                        await message.reply(response);
+                    } else if (response.media) {
+                        await this.client.sendMessage(message.from, response.media, { 
+                            caption: response.text 
+                        });
+                    } else {
+                        await message.reply(response.text);
+                    }
+                } catch (error) {
+                    logger.error(`Error al enviar respuesta: ${error}`);
+                }
             }
         });
 

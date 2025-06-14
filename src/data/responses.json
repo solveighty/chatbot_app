@@ -9,16 +9,31 @@
   "despedidas": [
     "¡Gracias por escribirnos! Que tengas un lindo día.",
     "Nos vemos pronto. ¡Dios te bendiga!",
-    "¡Pedido recibido! Te esperamos en el monasterio."
+    "¡Esperamos verte pronto en el monasterio!"
   ],
   "agradecimientos": [
     "¡Gracias a ti por tu interés!",
     "Es un placer poder ayudarte.",
     "Gracias por contactarnos, estamos para servirte."
   ],
+  "productos": [
+    "Tenemos varios productos artesanales. Escribe *ver productos* para ver la lista completa.",
+    "Nuestros productos son elaborados con dedicación y oración. Escribe *ver productos* para conocer nuestro catálogo.",
+    "Las hermanas del monasterio elaboran productos de alta calidad. Escribe *ver productos* para más información."
+  ],
+  "compra": [
+    "Para comprar, escribe: *quiero comprar* seguido del nombre exacto del producto. Por ejemplo: 'quiero comprar Frasco de 500 ml'",
+    "Si deseas adquirir algún producto, escribe: *quiero comprar* y el nombre exacto del producto como aparece en el catálogo.",
+    "¿Te interesa algún producto? Escribe: *quiero comprar* seguido del nombre exacto del producto que deseas."
+  ],
+  "ayuda": [
+    "Para usar este bot, escribe *ver productos* para ver el catálogo, y luego *quiero comprar* seguido del nombre exacto del producto que deseas.",
+    "Si necesitas ayuda para hacer un pedido, escribe *ayuda* en cualquier momento.",
+    "Para comprar correctamente, debes escribir el nombre exacto del producto como aparece en el catálogo."
+  ],
   "default": [
-    "Disculpa, no entendí tu mensaje. ¿Podrías reformularlo?",
-    "No estoy seguro de cómo responder a eso. ¿Puedes ser más específico?",
-    "Hmm, ¿me podrías explicar mejor en qué te puedo ayudar?"
+    "Disculpa, no entendí tu mensaje. Para ver nuestro catálogo, escribe *ver productos*. Para obtener ayuda, escribe *ayuda*.",
+    "No estoy seguro de cómo responder. ¿Te gustaría ver nuestros productos? Escribe *ver productos*. Para instrucciones, escribe *ayuda*.",
+    "Hmm, ¿me podrías explicar mejor en qué te puedo ayudar? Para instrucciones sobre cómo usar este bot, escribe *ayuda*."
   ]
 }

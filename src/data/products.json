@@ -1,0 +1,237 @@
+[
+  {
+    "categoria": "Miel de Abeja",
+    "productos": [
+      {
+        "nombre": "Frasco de 500 ml",
+        "precio": 10.0,
+        "imagen": "images/miel-500ml.jpg"
+      },
+      {
+        "nombre": "Frasco de 300 ml",
+        "precio": 5.0,
+        "imagen": "images/miel-300ml.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Cake",
+    "productos": [
+      {
+        "nombre": "De 90 gr",
+        "precio": 1.0,
+        "imagen": "images/cake-90g.jpg"
+      },
+      {
+        "nombre": "De 260 gr",
+        "precio": 3.0,
+        "imagen": "images/cake-260g.jpg"
+      },
+      {
+        "nombre": "De 745 gr",
+        "precio": 5.75,
+        "imagen": "images/cake-745g.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Alfajores",
+    "productos": [
+      {
+        "nombre": "Fundita de 3 unidades",
+        "precio": 1.0,
+        "imagen": "images/alfajores-3u.jpg"
+      },
+      {
+        "nombre": "1 unidad",
+        "precio": 0.3,
+        "imagen": "images/alfajor-1u.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Manjar de Leche",
+    "productos": [
+      {
+        "nombre": "Frasco de 550 gr",
+        "precio": 4.0,
+        "imagen": "images/manjar-550g.jpg"
+      },
+      {
+        "nombre": "Frasco de 300 gr",
+        "precio": 2.8,
+        "imagen": "images/manjar-300g.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Propóleo",
+    "productos": [
+      {
+        "nombre": "Antibacteriológico y cicatrizante",
+        "precio": 3.0,
+        "imagen": "images/propolis-antibac.jpg"
+      },
+      {
+        "nombre": "Crema facial quita manchas y antiarrugas",
+        "precio": 5.0,
+        "imagen": "images/crema-facial.jpg"
+      },
+      {
+        "nombre": "Crema para heridas, varices, granos",
+        "precio": 5.0,
+        "imagen": "images/crema-heridas.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Cruces de Tagua",
+    "productos": [
+      {
+        "nombre": "Diferentes diseños y colores",
+        "precio": 1.5,
+        "imagen": "images/cruces-tagua.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Cerámicas",
+    "productos": [
+      {
+        "nombre": "Cerámica $1,00",
+        "precio": 1.0,
+        "imagen": "images/ceramica-1.jpg"
+      },
+      {
+        "nombre": "Cerámica $2,25",
+        "precio": 2.25,
+        "imagen": "images/ceramica-2_25.jpg"
+      },
+      {
+        "nombre": "Cerámica $2,50",
+        "precio": 2.5,
+        "imagen": "images/ceramica-2_5.jpg"
+      },
+      {
+        "nombre": "Cerámica $2,75",
+        "precio": 2.75,
+        "imagen": "images/ceramica-2_75.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Fundas Ecológicas",
+    "productos": [
+      {
+        "nombre": "Colores: crema, café y negro",
+        "precio": 1.5,
+        "imagen": "images/fundas-ecologicas.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Cactus",
+    "productos": [
+      {
+        "nombre": "Diferentes formas",
+        "precio": 1.0,
+        "imagen": "images/cactus.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "CD Himno Monástico",
+    "productos": [
+      {
+        "nombre": "CD de Himnos",
+        "precio": 5.0,
+        "imagen": "images/cd-himnos.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Medallas de San Benito",
+    "productos": [
+      {
+        "nombre": "Pequeña",
+        "precio": 1.0,
+        "imagen": "images/medalla-pequena.jpg"
+      },
+      {
+        "nombre": "Mediana",
+        "precio": 2.5,
+        "imagen": "images/medalla-mediana.jpg"
+      },
+      {
+        "nombre": "Grande",
+        "precio": 3.5,
+        "imagen": "images/medalla-grande.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Cirios por la Paz",
+    "productos": [
+      {
+        "nombre": "Grande",
+        "precio": 5.75,
+        "imagen": "images/cirio-paz-grande.jpg"
+      },
+      {
+        "nombre": "Pequeñito",
+        "precio": 1.5,
+        "imagen": "images/cirio-paz-pequeno.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Cirios Pascuales",
+    "productos": [
+      {
+        "nombre": "Cirio Pascual",
+        "precio": 80.0,
+        "imagen": "images/cirio-pascual.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Cirios Litúrgicos",
+    "productos": [
+      {
+        "nombre": "De 24 cm - Blanco, Verde, Amarillo, Rojo, Morado",
+        "precio": 7.0,
+        "imagen": "images/cirio-24cm.jpg"
+      },
+      {
+        "nombre": "De 12 cm - Blanco, Verde, Amarillo, Rojo, Morado",
+        "precio": 4.25,
+        "imagen": "images/cirio-12cm.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Llaveros y Esferos (Bambú)",
+    "productos": [
+      {
+        "nombre": "Llaveros",
+        "precio": 2.0,
+        "imagen": "images/llavero-bambu.jpg"
+      },
+      {
+        "nombre": "Esferos",
+        "precio": 1.5,
+        "imagen": "images/esfero-bambu.jpg"
+      }
+    ]
+  },
+  {
+    "categoria": "Pulseras (macramé)",
+    "productos": [
+      {
+        "nombre": "Diferentes colores",
+        "precio": 0.5,
+        "imagen": "images/pulsera-macrame.jpg"
+      }
+    ]
+  }
+]

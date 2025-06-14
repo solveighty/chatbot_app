@@ -1,11 +1,11 @@
-import { Message } from 'whatsapp-web.js';
+import { Message, MessageMedia } from 'whatsapp-web.js';
 import { BotService } from '../services/botService';
 import logger from '../utils/logger';
 
 export const handleMessage = async (
     message: Message, 
     botService: BotService
-): Promise<string | undefined> => {
+): Promise<string | { text: string, media?: MessageMedia } | undefined> => {
     try {
         if (message.body) {
             return await botService.generateResponse(message);
