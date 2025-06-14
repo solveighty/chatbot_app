@@ -1,6 +1,6 @@
 import { Client, LocalAuth, Message } from 'whatsapp-web.js';
 import { ClientOptions } from './types';
-import  logger from '../utils/logger';
+import logger from '../utils/logger';
 
 export class WhatsAppClient {
     private client: Client;
@@ -27,7 +27,13 @@ export class WhatsAppClient {
         });
 
         this.client.on('message', async (message) => {
-            logger.info(`Mensaje recibido: ${message.body}`);
+            const isGroup = message.from.includes('@g.us');
+            
+            if (isGroup) {
+                logger.info(`Mensaje de grupo ignorado: ${message.body}`);
+                return;
+            }
+            
             const response = await this.messageHandler(message);
             if (response) {
                 await message.reply(response);
