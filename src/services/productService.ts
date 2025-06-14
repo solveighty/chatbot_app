@@ -3,10 +3,16 @@ import path from "path";
 import logger from "../utils/logger";
 import { MessageMedia } from "whatsapp-web.js";
 
+interface ProductoVariante {
+  nombre: string;
+  precio: number;
+}
+
 interface Producto {
   nombre: string;
   precio: number;
   imagen: string;
+  variantes?: ProductoVariante[];
 }
 
 interface Categoria {
@@ -63,11 +69,12 @@ export class ProductService {
       mensaje += "\n";
     });
 
-    mensaje += "Para ver imágenes, escribe: *ver imágenes*\n\n";
-    mensaje += "📌 *¿Cómo hacer un pedido?*\n";
-    mensaje +=
-      "Escribe *quiero comprar* seguido del nombre exacto del producto.\n";
-    mensaje += 'Ejemplo: "quiero comprar Frasco de 500 ml"\n\n';
+    mensaje += "📷 Para ver imágenes, escribe: *ver imágenes*\n\n";
+    mensaje += "🛒 *¿Cómo hacer un pedido?*\n";
+    mensaje += "1. Escribe *quiero comprar* seguido del nombre exacto del producto.\n";
+    mensaje += "2. Puedes agregar varios productos a tu carrito.\n";
+    mensaje += "3. Escribe *carrito* para ver tus productos seleccionados.\n";
+    mensaje += "4. Escribe *finalizar compra* cuando estés listo.\n\n";
     mensaje += "Para más ayuda, escribe: *ayuda*";
 
     return mensaje;
@@ -115,8 +122,7 @@ export class ProductService {
 
     if (!categoriaSeleccionada) {
       return {
-        texto:
-          "❌ Categoría no encontrada. Por favor, elige una categoría válida del menú.",
+        texto: "❌ Categoría no encontrada. Por favor, elige una categoría válida del menú.",
       };
     }
 
@@ -131,22 +137,28 @@ export class ProductService {
     mensaje +=
       "\n💬 Para hacer un pedido, escribe: *quiero comprar* seguido del producto.";
 
-    // se retoma la lógica para cargar la imagen del primer producto
-    if (productos.length > 0 && productos[0].imagen) {
-      try {
-        const mediaPath = path.resolve(
-          process.cwd(),
-          "src/data/images/" + productos[0].imagen
-        );
+    try {
+      // se intenta cargar la imagen del primer producto
+      if (productos.length > 0 && productos[0].imagen) {
+        const imagenPath = productos[0].imagen;
+        // se construye la ruta completa del archivo de imagen
+        const mediaPath = path.resolve(process.cwd(), "src/data", imagenPath);
+
+        logger.info(`Intentando cargar imagen desde: ${mediaPath}`);
+
         if (fs.existsSync(mediaPath)) {
           const media = MessageMedia.fromFilePath(mediaPath);
           return { texto: mensaje, imagen: media };
+        } else {
+          // si el archivo no existe, se registra un error
+          logger.error(`Archivo de imagen no encontrado: ${mediaPath}`);
         }
-      } catch (error) {
-        logger.error(`Error al cargar imagen: ${error}`);
       }
+    } catch (error) {
+      logger.error(`Error al cargar imagen: ${error}`);
     }
 
+    // si no hay imagen o falla la carga, se devuelve solo el texto
     return { texto: mensaje };
   }
 
@@ -207,16 +219,79 @@ export class ProductService {
       };
     }
 
-    // se busca el producto en todas las categorías
+    // se buscan variantes de productos primero
+    for (const categoria of this.productos) {
+      for (const producto of categoria.productos) {
+        // si tiene variantes, buscamos coincidencias
+        if (producto.variantes && producto.variantes.length > 0) {
+          // se busca en las variantes
+          for (const variante of producto.variantes) {
+            const nombreVariante = variante.nombre.toLowerCase();
+            const nombreCompleto = `${producto.nombre} - ${variante.nombre}`.toLowerCase();
+
+            // si hay coincidencia con el texto del pedido
+            if (
+              nombreVariante.includes(textoPedido) ||
+              textoPedido.includes(nombreVariante) ||
+              nombreCompleto.includes(textoPedido)
+            ) {
+              const precioFormateado = variante.precio.toFixed(2).replace(".", ",");
+              const nombreMostrar = `${producto.nombre} - ${variante.nombre}`;
+
+              return {
+                texto:
+                  `✅ *Producto encontrado:*\n\n` +
+                  `📦 ${nombreMostrar}\n` +
+                  `💰 Precio: $${precioFormateado}\n` +
+                  `🏷️ Categoría: ${categoria.categoria}\n\n` +
+                  `Para confirmar tu pedido, por favor envía los siguientes datos:\n\n` +
+                  `1️⃣ Tu nombre completo\n` +
+                  `2️⃣ Tu dirección de entrega (o indica si recogerás en el Monasterio)\n` +
+                  `3️⃣ Tu número de teléfono\n` +
+                  `4️⃣ Cantidad de unidades\n\n` +
+                  `Nota: La información se usará únicamente para procesar tu pedido.`,
+                encontrado: true,
+                producto: {
+                  nombre: nombreMostrar,
+                  precio: variante.precio,
+                  categoria: categoria.categoria,
+                },
+              };
+            }
+          }
+        }
+      }
+    }
+
+    // si no se encontró variante, buscamos por nombre de producto
     for (const categoria of this.productos) {
       for (const producto of categoria.productos) {
         const nombreProducto = producto.nombre?.toLowerCase() || "";
 
-        // si el nombre del producto contiene el texto del pedido
         if (
+          nombreProducto === textoPedido ||
           nombreProducto.includes(textoPedido) ||
           textoPedido.includes(nombreProducto)
         ) {
+          // si tiene variantes pero no se especificó una, mostramos opciones
+          if (producto.variantes && producto.variantes.length > 0) {
+            let opciones = `El producto *${producto.nombre}* tiene estas opciones disponibles:\n\n`;
+
+            producto.variantes.forEach((variante, index) => {
+              const precioVariante = variante.precio.toFixed(2).replace(".", ",");
+              opciones += `${index + 1}. ${variante.nombre}: $${precioVariante}\n`;
+            });
+
+            opciones += `\nPor favor, especifica qué opción deseas. Por ejemplo:\n`;
+            opciones += `"Quiero comprar ${producto.nombre} ${producto.variantes[0].nombre}"`;
+
+            return {
+              texto: opciones,
+              encontrado: false,
+            };
+          }
+
+          // productos sin variantes
           const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
 
           return {
@@ -242,17 +317,22 @@ export class ProductService {
       }
     }
 
-    // si también se busca por categoría
+    // se busca por categoría si no se encontró producto exacto
     for (const categoria of this.productos) {
       if (categoria.categoria.toLowerCase().includes(textoPedido)) {
         let sugerencias = "";
         if (categoria.productos.length > 0) {
           sugerencias = "Algunos productos de esta categoría:\n\n";
           categoria.productos.forEach((producto) => {
-            const precioFormateado = producto.precio
-              .toFixed(2)
-              .replace(".", ",");
-            sugerencias += `- ${producto.nombre}: $${precioFormateado}\n`;
+            const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
+
+            if (producto.variantes && producto.variantes.length > 0) {
+              // si tiene variantes, mostramos opciones
+              sugerencias += `- ${producto.nombre}: $${precioFormateado}\n`;
+              sugerencias += `  Opciones: ${producto.variantes.map((v) => v.nombre).join(", ")}\n`;
+            } else {
+              sugerencias += `- ${producto.nombre}: $${precioFormateado}\n`;
+            }
           });
         }
 
@@ -324,5 +404,85 @@ export class ProductService {
     mensaje += `Para comprar, escribe: *quiero comprar* seguido del nombre del producto.`;
 
     return mensaje;
+  }
+
+  /**
+   * Busca un producto exacto por su nombre
+   */
+  public buscarProductoExacto(nombreProducto: string): {
+    nombre: string;
+    precio: number;
+    categoria: string;
+  } | null {
+    nombreProducto = nombreProducto.toLowerCase().trim();
+
+    for (const categoria of this.productos) {
+      for (const producto of categoria.productos) {
+        const nombreActual = producto.nombre?.toLowerCase() || "";
+
+        if (
+          nombreActual === nombreProducto ||
+          nombreActual.includes(nombreProducto) ||
+          nombreProducto.includes(nombreActual)
+        ) {
+          return {
+            nombre: producto.nombre,
+            precio: producto.precio,
+            categoria: categoria.categoria,
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Busca un producto específico dentro de una categoría
+   */
+  public buscarProductoEnCategoria(nombreCategoria: string, nombreProducto: string): Producto | null {
+    const categoriaIndex = this.obtenerIndiceCategoria(nombreCategoria);
+    if (categoriaIndex === -1) return null;
+    
+    const categoria = this.productos[categoriaIndex];
+    return categoria.productos.find(p => 
+      p.nombre.toLowerCase().includes(nombreProducto.toLowerCase())
+    ) || null;
+  }
+
+  /**
+   * Obtiene el índice de una categoría por nombre o número
+   */
+  public obtenerIndiceCategoria(seleccion: string): number {
+    // Verificar si es un número
+    const seleccionNumero = parseInt(seleccion);
+    
+    if (!isNaN(seleccionNumero) && seleccionNumero > 0 && seleccionNumero <= this.productos.length) {
+      return seleccionNumero - 1;
+    }
+    
+    // Buscar por nombre
+    return this.productos.findIndex(cat => 
+      cat.categoria.toLowerCase().includes(seleccion.toLowerCase())
+    );
+  }
+
+  /**
+   * Obtiene la imagen de un producto
+   */
+  public async obtenerImagenProducto(producto: Producto): Promise<MessageMedia | undefined> {
+    try {
+      if (producto && producto.imagen) {
+        const mediaPath = path.resolve(process.cwd(), 'src/data', producto.imagen);
+        
+        if (fs.existsSync(mediaPath)) {
+          return MessageMedia.fromFilePath(mediaPath);
+        }
+      }
+      return undefined;
+    } catch (error) {
+      logger.error(`Error al obtener imagen del producto: ${error}`);
+      return undefined;
+    }
   }
 }

@@ -1,15 +1,17 @@
 {
   "saludos": [
-    "¡Hola! ¿Cómo puedo ayudarte hoy?",
-    "¡Qué gusto verte! ¿En qué necesitas ayuda?",
-    "¡Bienvenido/a! ¿Qué deseas consultar?",
-    "¡Hola hola! Estoy aquí para ayudarte.",
-    "¡Bendiciones! ¿Qué producto deseas hoy?"
+    "🙏 ¡Bienvenido/a! ¿En qué puedo ayudarte hoy? Escribe *ver productos* para explorar nuestro catálogo o *ayuda* para más opciones.",
+    "🌿 ¡Hola! Es un gusto saludarte. Escribe *ver productos* para conocer nuestros productos artesanales o *ayuda* si necesitas orientación.",
+    "😊 ¡Qué alegría tenerte por aquí! Puedes escribir *ver productos* para ver lo que ofrecemos o *ayuda* para más detalles.",
+    "📦 ¡Saludos! Estoy aquí para asistirte. Usa *ver productos* para conocer nuestras creaciones o *ayuda* para saber cómo funciona todo.",
+    "🕊️ ¡Bendiciones! Si deseas ver nuestros productos, escribe *ver productos*. Para más información, puedes usar *ayuda*."
   ],
   "despedidas": [
-    "¡Gracias por escribirnos! Que tengas un lindo día.",
-    "Nos vemos pronto. ¡Dios te bendiga!",
-    "¡Esperamos verte pronto en el monasterio!"
+    "🙏 ¡Gracias por tu mensaje! Que tengas un día lleno de bendiciones.",
+    "🌿 Nos alegra haberte podido ayudar. ¡Hasta pronto!",
+    "😊 Esperamos verte pronto. ¡Cuídate mucho!",
+    "📦 Gracias por contactarnos. Que tengas un excelente día.",
+    "🕊️ ¡Dios te bendiga! Nos vemos en el monasterio."
   ],
   "agradecimientos": [
     "¡Gracias a ti por tu interés!",

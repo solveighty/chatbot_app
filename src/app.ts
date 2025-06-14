@@ -2,10 +2,16 @@ import { WHATSAPP_CLIENT_OPTIONS } from './config/environment';
 import { handleMessage } from './handlers/messageHandler';
 import { BotService } from './services/botService';
 import { WhatsAppClient } from './core/client';
-import  logger  from './utils/logger';
+import logger from './utils/logger';
+import { verificarRutasImagenes } from './utils/imageDebugger';
 
 // inicializar el cliente de WhatsApp y el servicio de bot
 try {
+    logger.info('Iniciando bot de WhatsApp...');
+    
+    // Verificar imágenes al inicio
+    verificarRutasImagenes();
+    
     const botService = new BotService();
     const messageProcessor = (message: any) => handleMessage(message, botService);
     

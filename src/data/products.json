@@ -125,7 +125,21 @@
       {
         "nombre": "Colores: crema, café y negro",
         "precio": 1.5,
-        "imagen": "images/fundas-ecologicas.jpg"
+        "imagen": "images/fundas-ecologicas.jpg",
+        "variantes": [
+          {
+            "nombre": "Color crema",
+            "precio": 1.5
+          },
+          {
+            "nombre": "Color café",
+            "precio": 1.5
+          },
+          {
+            "nombre": "Color negro",
+            "precio": 1.5
+          }
+        ]
       }
     ]
   },
@@ -200,12 +214,56 @@
       {
         "nombre": "De 24 cm - Blanco, Verde, Amarillo, Rojo, Morado",
         "precio": 7.0,
-        "imagen": "images/cirio-24cm.jpg"
+        "imagen": "images/cirio-24cm.jpg",
+        "variantes": [
+          {
+            "nombre": "Color blanco",
+            "precio": 7.0
+          },
+          {
+            "nombre": "Color verde",
+            "precio": 7.0
+          },
+          {
+            "nombre": "Color amarillo",
+            "precio": 7.0
+          },
+          {
+            "nombre": "Color rojo",
+            "precio": 7.0
+          },
+          {
+            "nombre": "Color morado",
+            "precio": 7.0
+          }
+        ]
       },
       {
         "nombre": "De 12 cm - Blanco, Verde, Amarillo, Rojo, Morado",
         "precio": 4.25,
-        "imagen": "images/cirio-12cm.jpg"
+        "imagen": "images/cirio-12cm.jpg",
+        "variantes": [
+          {
+            "nombre": "Color blanco",
+            "precio": 4.25
+          },
+          {
+            "nombre": "Color verde",
+            "precio": 4.25
+          },
+          {
+            "nombre": "Color amarillo",
+            "precio": 4.25
+          },
+          {
+            "nombre": "Color rojo",
+            "precio": 4.25
+          },
+          {
+            "nombre": "Color morado",
+            "precio": 4.25
+          }
+        ]
       }
     ]
   },
