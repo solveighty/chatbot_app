@@ -8,6 +8,7 @@ export const handleMessage = async (
 ): Promise<string | { text: string, media?: MessageMedia } | undefined> => {
     try {
         if (message.body) {
+            logger.debug(`Procesando mensaje: ${message.body}`);
             return await botService.generateResponse(message);
         }
         return undefined;

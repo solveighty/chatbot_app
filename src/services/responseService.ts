@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import logger from '../utils/logger';
+import { IResponseService } from '../interfaces/services';
 
 interface ResponseCollection {
   [key: string]: string[];
 }
 
-export class ResponseService {
+export class ResponseService implements IResponseService {
   private responses: ResponseCollection;
 
   constructor() {
@@ -74,12 +75,11 @@ export class ResponseService {
            `Para hacer un pedido, sigue estos pasos:\n\n` +
            `1️⃣ Escribe *ver productos* para ver el catálogo completo\n\n` +
            `2️⃣ Identifica el producto exacto que deseas comprar\n\n` +
-           `3️⃣ Escribe *quiero comprar* seguido del nombre exacto del producto como aparece en el catálogo.\n` +
-           `   ✅ Ejemplo correcto: "quiero comprar Frasco de 500 ml"\n` +
-           `   ❌ Ejemplo incorrecto: "quiero comprar miel"\n\n` +
-           `4️⃣ Para productos con opciones (colores, tamaños, etc.):\n` +
-           `   ✅ Ejemplo: "quiero comprar Fundas Ecológicas Color café"\n` +
-           `   ✅ Ejemplo: "quiero comprar Cirios Litúrgicos 24 cm Color rojo"\n\n` +
+           `3️⃣ Para productos normales:\n` +
+           `   ✅ Ejemplo: "quiero comprar Frasco de 500 ml"\n\n` +
+           `4️⃣ Para productos con colores o variantes:\n` +
+           `   ✅ Ejemplo: "quiero comprar De 12 cm Color blanco"\n` +
+           `   ✅ Ejemplo: "quiero comprar Fundas Ecológicas Color café"\n\n` +
            `5️⃣ Puedes añadir más productos a tu carrito repitiendo los pasos anteriores\n\n` +
            `6️⃣ Cuando termines de agregar productos, escribe *carrito* para ver tu selección\n\n` +
            `7️⃣ Escribe *finalizar compra* para proceder al pago\n\n` +

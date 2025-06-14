@@ -1,21 +1,16 @@
 import { Message, MessageMedia } from 'whatsapp-web.js';
-import { ResponseService } from './responseService';
-import { ProductService } from './productService';
-import { CartService } from './cartService';
+import { ICartService, IConversationStateManager, IProductService, IResponseService } from '../interfaces/services';
+import { CommandHandler } from '../handlers/commandHandler';
 import logger from '../utils/logger';
 
 export class BotService {
-  private responseService: ResponseService;
-  private productService: ProductService;
-  private cartService: CartService;
-  private conversationState: Map<string, any>;
-
-  constructor() {
-    this.responseService = new ResponseService();
-    this.productService = new ProductService();
-    this.cartService = new CartService();
-    this.conversationState = new Map();
-  }
+  constructor(
+    private readonly responseService: IResponseService,
+    private readonly productService: IProductService,
+    private readonly cartService: ICartService,
+    private readonly stateManager: IConversationStateManager,
+    private readonly commandHandler: CommandHandler
+  ) {}
 
   public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia }> {
     try {
@@ -25,106 +20,34 @@ export class BotService {
       
       logger.info(`Generando respuesta para: "${userMessage}"`);
       
-      // Comando de carrito
-      if (userMessageLower === 'carrito' || userMessageLower === 'ver carrito') {
-        return this.cartService.generateCartSummary(userId);
+      // se verifica si el mensaje es un comando
+      const commandResult = await this.commandHandler.handleCommand(
+        userMessage, 
+        userId, 
+        this.stateManager.getState(userId)
+      );
+      
+      if (commandResult.response) {
+        // si hay actualizaciones de estado, las aplicamos
+        if (commandResult.stateUpdates) {
+          this.stateManager.updateState(userId, commandResult.stateUpdates);
+        }
+        return commandResult.response;
       }
       
-      // Comando para finalizar compra
-      if (userMessageLower === 'finalizar compra') {
-        const cart = this.cartService.getCart(userId);
-        if (cart.length === 0) {
-          return "Tu carrito está vacío. Añade productos antes de finalizar la compra.";
-        }
-        
-        // Iniciar proceso de finalización
-        this.updateConversationState(userId, { 
-          lastCategory: 'checkout', 
-          etapaPedido: 'datos_cliente',
-          timestamp: new Date()
-        });
-        
-        return `Por favor, proporciona los siguientes datos para finalizar tu compra:\n\n` +
-               `1️⃣ Tu nombre completo\n` +
-               `2️⃣ Tu dirección de entrega (o indica si recogerás en el Monasterio)\n` +
-               `3️⃣ Tu número de teléfono`;
+      // se verifica si es comando de carrito
+      const cartCommandResult = await this.commandHandler.handleCartCommands(userMessage, userId);
+      if (cartCommandResult?.response) {
+        return cartCommandResult.response;
       }
       
-      // Comando para vaciar carrito
-      if (userMessageLower === 'vaciar carrito' || userMessageLower === 'cancelar compra') {
-        this.cartService.clearCart(userId);
-        return "🗑️ Tu carrito ha sido vaciado. Puedes seguir explorando nuestros productos.";
-      }
-      
-      // Comando para añadir al carrito
-      if (userMessageLower.startsWith('añadir') || userMessageLower.startsWith('anadir') || userMessageLower.startsWith('agregar')) {
-        const partes = userMessageLower.split(' ');
-        if (partes.length < 3) {
-          return "Para añadir un producto, escribe: *añadir [cantidad] [nombre del producto]*\n" +
-                 "Ejemplo: añadir 2 Frasco de 500 ml";
-        }
-        
-        const cantidadStr = partes[1];
-        const cantidad = parseInt(cantidadStr);
-        if (isNaN(cantidad) || cantidad <= 0) {
-          return "Por favor, indica una cantidad válida. Ejemplo: *añadir 2 Frasco de 500 ml*";
-        }
-        
-        const nombreProducto = userMessage.substring(userMessage.indexOf(cantidadStr) + cantidadStr.length).trim();
-        
-        // Buscar producto
-        const producto = this.productService.buscarProductoExacto(nombreProducto);
-        if (!producto) {
-          return `No encontré el producto "${nombreProducto}". Verifica el nombre exacto en el catálogo.`;
-        }
-        
-        // Añadir al carrito
-        this.cartService.addItemToCart(userId, producto, cantidad);
-        return `✅ Añadido al carrito: ${producto.nombre} x${cantidad}\n\n` +
-               `Escribe *carrito* para ver tu carrito de compras.`;
-      }
-      
-      // Comando para quitar del carrito
-      if (userMessageLower.startsWith('quitar') || userMessageLower.startsWith('eliminar') || userMessageLower.startsWith('borrar')) {
-        const partes = userMessageLower.split(' ');
-        if (partes.length < 2) {
-          return "Para quitar un producto, escribe: *quitar [número]*\n" +
-                 "El número es la posición del producto en el carrito.\n" +
-                 "Ejemplo: quitar 1";
-        }
-        
-        const indiceStr = partes[1];
-        const indice = parseInt(indiceStr) - 1; // Restamos 1 porque los índices empiezan en 0
-        
-        if (isNaN(indice) || indice < 0) {
-          return "Por favor, indica un número válido. Ejemplo: *quitar 1*";
-        }
-        
-        const eliminado = this.cartService.removeItemFromCart(userId, indice);
-        if (eliminado) {
-          return "✅ Producto eliminado del carrito.\n\n" +
-                 this.cartService.generateCartSummary(userId);
-        } else {
-          return "❌ No encontré ese producto en tu carrito. Verifica el número.";
-        }
-      }
-
-      // Manejar comando de ayuda
-      if (userMessageLower === 'ayuda' || 
-          userMessageLower === 'help' || 
-          userMessageLower === 'como comprar' ||
-          userMessageLower === 'cómo comprar') {
-        return this.responseService.getHelpMessage();
-      }
-      
-      // Manejar intención de compra
+      // lógica de compra
       if (userMessageLower.includes('quiero comprar') || 
           userMessageLower.includes('comprar') || 
           userMessageLower.includes('pedir')) {
         const resultado = this.productService.procesarPedido(userMessage);
         
         if (resultado.encontrado && resultado.producto) {
-          // Añadir al carrito en vez de iniciar pedido directo
           this.cartService.addItemToCart(userId, resultado.producto, 1);
           
           return `✅ *Producto añadido al carrito:*\n\n` +
@@ -139,31 +62,23 @@ export class BotService {
         return resultado.texto;
       }
 
-      // Procesar estado de compra finalizada
-      const state = this.getConversationState(userId);
+      // se verifica el estado actual de la conversación
+      const state = this.stateManager.getState(userId);
+      
+      // estado checkout
       if (state && state.lastCategory === 'checkout') {
-        return this.procesarCheckout(userId, userMessage, state);
+        return this.procesarCheckout(userId, userMessage);
       }
       
-      // Resto del código existente...
-      if (userMessageLower.includes('ver productos')) {
-        return this.productService.generarListaProductos();
-      }
-      
-      if (userMessageLower.includes('ver imágenes') || userMessageLower.includes('ver imagenes')) {
-        this.updateConversationState(userId, { lastCategory: 'menu_categorias', timestamp: new Date() });
-        return this.productService.generarMenuCategorias();
-      }
-      
-      // Verificar si el usuario está en el flujo de selección de categoría
+      // estado de selección de cat images
       if (state && state.lastCategory === 'menu_categorias') {
-        // Si el mensaje parece ser un nombre de producto específico
+        // si el mensaje parece ser un nombre de producto específico
         const categoriaActual = state.categoriaSeleccionada;
         if (categoriaActual) {
           const productoSeleccionado = this.productService.buscarProductoEnCategoria(categoriaActual, userMessage);
           
           if (productoSeleccionado) {
-            // El usuario ha seleccionado un producto específico después de ver una categoría
+            // el usuario ha seleccionado un producto específico después de ver una categoría
             return {
               text: `¿Deseas comprar ${productoSeleccionado.nombre}?\n\n` +
                     `Para añadir al carrito, escribe: *quiero comprar ${productoSeleccionado.nombre}*`,
@@ -172,12 +87,12 @@ export class BotService {
           }
         }
         
-        // Procesar la selección de categoría
+        // procesar la selección de categoría
         const resultado = await this.productService.procesarSeleccionCategoria(userMessage);
         
         if (resultado.imagen) {
-          // Guardar la categoría seleccionada en el estado para futuras consultas
-          this.updateConversationState(userId, { 
+          // guardar la categoría seleccionada en el estado para futuras consultas
+          this.stateManager.updateState(userId, { 
             categoriaSeleccionada: userMessage 
           });
           
@@ -189,11 +104,11 @@ export class BotService {
         return resultado.texto;
       }
       
-      // Si el mensaje contiene un número o nombre que podría ser una categoría
+      // manejo de mensajes por número o categoría sin context previo
       if ((/^\d+$/.test(userMessageLower) || this.esPosibleCategoria(userMessageLower)) && 
           !state?.lastCategory) {
-        // Asumimos que el usuario intenta seleccionar una categoría sin ver el menú primero
-        this.updateConversationState(userId, { lastCategory: 'menu_categorias', timestamp: new Date() });
+        // se asume que el usuario intenta seleccionar una categoría sin ver el menú primero
+        this.stateManager.updateState(userId, { lastCategory: 'menu_categorias', timestamp: new Date() });
         const resultado = await this.productService.procesarSeleccionCategoria(userMessage);
         
         if (resultado.imagen) {
@@ -205,14 +120,14 @@ export class BotService {
         return resultado.texto;
       }
       
-      // Si no es un comando especial, usar el servicio de respuestas genéricas
+      // última opción: respuesta genérica según categoría detectada
       const category = this.responseService.determineCategory(userMessage);
       
-      // Si el usuario está viendo productos, recordar esto en el estado
+      // actualizar estado según la categoría detectada
       if (category === 'productos') {
-        this.updateConversationState(userId, { lastCategory: 'menu_categorias', timestamp: new Date() });
+        this.stateManager.updateState(userId, { lastCategory: 'menu_categorias', timestamp: new Date() });
       } else {
-        this.updateConversationState(userId, { lastCategory: category, timestamp: new Date() });
+        this.stateManager.updateState(userId, { lastCategory: category, timestamp: new Date() });
       }
       
       return this.responseService.getRandomResponse(category);
@@ -225,18 +140,19 @@ export class BotService {
   /**
    * Procesa el checkout del pedido
    */
-  private procesarCheckout(userId: string, mensaje: string, estado: any): string {
-    const { etapaPedido } = estado;
+  private procesarCheckout(userId: string, mensaje: string): string {
+    const state = this.stateManager.getState(userId);
+    const { etapaPedido } = state;
     const carrito = this.cartService.getCart(userId);
     
     if (etapaPedido === 'datos_cliente') {
-      // Guardar los datos del cliente
-      this.updateConversationState(userId, {
+      // guardar los datos del cliente
+      this.stateManager.updateState(userId, {
         datosCliente: mensaje,
         etapaPedido: 'confirmacion',
       });
       
-      // Generar resumen del pedido
+      // generar resumen del pedido
       let resumen = `¡Gracias por proporcionar tus datos!\n\n*Resumen de tu pedido:*\n\n`;
       
       carrito.forEach((item, index) => {
@@ -259,15 +175,13 @@ export class BotService {
     }
     
     if (etapaPedido === 'confirmacion') {
-      if (mensaje.toLowerCase() === 'si' || mensaje.toLowerCase() === 'sí') {
-        // En una implementación real, aquí se guardaría el pedido en una base de datos
-        
-        // Limpiar el carrito después de la compra
+      if (mensaje.toLowerCase() === 'si' || mensaje.toLowerCase() === 'sí') {        
+        // limpiar el carrito después de la compra
         const total = this.cartService.getCartTotal(userId);
         const totalFormateado = total.toFixed(2).replace('.', ',');
         this.cartService.clearCart(userId);
         
-        this.updateConversationState(userId, {
+        this.stateManager.updateState(userId, {
           lastCategory: 'pedido_completo',
           etapaPedido: 'completado'
         });
@@ -279,7 +193,7 @@ export class BotService {
       } else {
         this.cartService.clearCart(userId);
         
-        this.updateConversationState(userId, {
+        this.stateManager.updateState(userId, {
           lastCategory: 'pedido_cancelado',
         });
         
@@ -290,19 +204,6 @@ export class BotService {
     }
     
     return `Por favor, proporciona la información solicitada para continuar con tu pedido.`;
-  }
-
-  // Métodos existentes...
-  public updateConversationState(userId: string, state: any): void {
-    const currentState = this.conversationState.get(userId) || {};
-    this.conversationState.set(userId, {
-      ...currentState,
-      ...state
-    });
-  }
-
-  public getConversationState(userId: string): any {
-    return this.conversationState.get(userId);
   }
 
   private esPosibleCategoria(mensaje: string): boolean {

@@ -2,8 +2,9 @@ import fs from "fs";
 import path from "path";
 import logger from "../utils/logger";
 import { MessageMedia } from "whatsapp-web.js";
+import { IProductService } from "../interfaces/services";
 
-interface ProductoVariante {
+interface Variante {
   nombre: string;
   precio: number;
 }
@@ -11,8 +12,8 @@ interface ProductoVariante {
 interface Producto {
   nombre: string;
   precio: number;
-  imagen: string;
-  variantes?: ProductoVariante[];
+  imagen?: string;
+  variantes?: Variante[];
 }
 
 interface Categoria {
@@ -20,7 +21,7 @@ interface Categoria {
   productos: Producto[];
 }
 
-export class ProductService {
+export class ProductService implements IProductService {
   private productos: Categoria[];
 
   constructor() {
@@ -53,7 +54,7 @@ export class ProductService {
   }
 
   /**
-   * Genera un texto con todos los productos disponibles
+   * Genera un texto con todos los productos disponibles mostrando variantes
    */
   public generarListaProductos(): string {
     let mensaje = "📦 *Productos disponibles:*\n\n";
@@ -64,7 +65,22 @@ export class ProductService {
 
       categoria.productos.forEach((producto) => {
         const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
-        mensaje += `- ${producto.nombre}: $${precioFormateado}\n`;
+        
+        if (producto.variantes && producto.variantes.length > 0) {
+          mensaje += `- ${producto.nombre}: $${precioFormateado}\n`;
+          
+          // se muestra cada variante con su precio
+          producto.variantes.forEach(variante => {
+            const precioVarianteFormateado = variante.precio.toFixed(2).replace(".", ",");
+            mensaje += `  • ${variante.nombre}: $${precioVarianteFormateado}\n`;
+          });
+          
+          // ejemplo de cómo ordenar
+          const primerVariante = producto.variantes[0];
+          mensaje += `  → Para ordenar: "quiero comprar ${producto.nombre} ${primerVariante.nombre}"\n`;
+        } else {
+          mensaje += `- ${producto.nombre}: $${precioFormateado}\n`;
+        }
       });
       mensaje += "\n";
     });
@@ -72,9 +88,10 @@ export class ProductService {
     mensaje += "📷 Para ver imágenes, escribe: *ver imágenes*\n\n";
     mensaje += "🛒 *¿Cómo hacer un pedido?*\n";
     mensaje += "1. Escribe *quiero comprar* seguido del nombre exacto del producto.\n";
-    mensaje += "2. Puedes agregar varios productos a tu carrito.\n";
-    mensaje += "3. Escribe *carrito* para ver tus productos seleccionados.\n";
-    mensaje += "4. Escribe *finalizar compra* cuando estés listo.\n\n";
+    mensaje += "2. Para productos con colores u opciones, especifícalo en tu pedido.\n";
+    mensaje += "3. Puedes agregar varios productos a tu carrito.\n";
+    mensaje += "4. Escribe *carrito* para ver tus productos seleccionados.\n";
+    mensaje += "5. Escribe *finalizar compra* cuando estés listo.\n\n";
     mensaje += "Para más ayuda, escribe: *ayuda*";
 
     return mensaje;
@@ -190,15 +207,13 @@ export class ProductService {
 
   /**
    * Procesa un pedido de compra
-   * @param pedido El texto del pedido del usuario
-   * @returns Objeto con respuesta y datos del pedido
    */
   public procesarPedido(pedido: string): {
     texto: string;
     encontrado: boolean;
     producto?: { nombre: string; precio: number; categoria: string };
   } {
-    // se normaliza el texto del pedido
+    // normalizar el texto del pedido
     const textoPedido = pedido
       .toLowerCase()
       .replace(
@@ -207,7 +222,7 @@ export class ProductService {
       )
       .trim();
 
-    // si el texto es muy corto, se solicita más información
+    // si el texto es muy corto, solicitar más información
     if (textoPedido.length < 3) {
       return {
         texto:
@@ -219,134 +234,56 @@ export class ProductService {
       };
     }
 
-    // se buscan variantes de productos primero
-    for (const categoria of this.productos) {
-      for (const producto of categoria.productos) {
-        // si tiene variantes, buscamos coincidencias
-        if (producto.variantes && producto.variantes.length > 0) {
-          // se busca en las variantes
-          for (const variante of producto.variantes) {
-            const nombreVariante = variante.nombre.toLowerCase();
-            const nombreCompleto = `${producto.nombre} - ${variante.nombre}`.toLowerCase();
-
-            // si hay coincidencia con el texto del pedido
-            if (
-              nombreVariante.includes(textoPedido) ||
-              textoPedido.includes(nombreVariante) ||
-              nombreCompleto.includes(textoPedido)
-            ) {
-              const precioFormateado = variante.precio.toFixed(2).replace(".", ",");
-              const nombreMostrar = `${producto.nombre} - ${variante.nombre}`;
-
-              return {
-                texto:
-                  `✅ *Producto encontrado:*\n\n` +
-                  `📦 ${nombreMostrar}\n` +
-                  `💰 Precio: $${precioFormateado}\n` +
-                  `🏷️ Categoría: ${categoria.categoria}\n\n` +
-                  `Para confirmar tu pedido, por favor envía los siguientes datos:\n\n` +
-                  `1️⃣ Tu nombre completo\n` +
-                  `2️⃣ Tu dirección de entrega (o indica si recogerás en el Monasterio)\n` +
-                  `3️⃣ Tu número de teléfono\n` +
-                  `4️⃣ Cantidad de unidades\n\n` +
-                  `Nota: La información se usará únicamente para procesar tu pedido.`,
-                encontrado: true,
-                producto: {
-                  nombre: nombreMostrar,
-                  precio: variante.precio,
-                  categoria: categoria.categoria,
-                },
-              };
-            }
-          }
-        }
-      }
+    // intentar encontrar el producto, ahora con mejor soporte para variantes
+    const productoEncontrado = this.buscarProductoExacto(textoPedido);
+    
+    if (productoEncontrado) {
+      const precioFormateado = productoEncontrado.precio.toFixed(2).replace(".", ",");
+      
+      return {
+        texto:
+          `✅ *Producto encontrado:*\n\n` +
+          `📦 ${productoEncontrado.nombre}\n` +
+          `💰 Precio: $${precioFormateado}\n` +
+          `🏷️ Categoría: ${productoEncontrado.categoria}\n\n` +
+          `Para confirmar tu pedido, por favor envía los siguientes datos:\n\n` +
+          `1️⃣ Tu nombre completo\n` +
+          `2️⃣ Tu dirección de entrega (o indica si recogerás en el Monasterio)\n` +
+          `3️⃣ Tu número de teléfono\n` +
+          `4️⃣ Cantidad de unidades\n\n` +
+          `Nota: La información se usará únicamente para procesar tu pedido.`,
+        encontrado: true,
+        producto: productoEncontrado,
+      };
     }
 
-    // si no se encontró variante, buscamos por nombre de producto
+    // buscar categoría para dar sugerencias específicas si no encontramos el producto
     for (const categoria of this.productos) {
-      for (const producto of categoria.productos) {
-        const nombreProducto = producto.nombre?.toLowerCase() || "";
-
-        if (
-          nombreProducto === textoPedido ||
-          nombreProducto.includes(textoPedido) ||
-          textoPedido.includes(nombreProducto)
-        ) {
-          // si tiene variantes pero no se especificó una, mostramos opciones
-          if (producto.variantes && producto.variantes.length > 0) {
-            let opciones = `El producto *${producto.nombre}* tiene estas opciones disponibles:\n\n`;
-
-            producto.variantes.forEach((variante, index) => {
-              const precioVariante = variante.precio.toFixed(2).replace(".", ",");
-              opciones += `${index + 1}. ${variante.nombre}: $${precioVariante}\n`;
-            });
-
-            opciones += `\nPor favor, especifica qué opción deseas. Por ejemplo:\n`;
-            opciones += `"Quiero comprar ${producto.nombre} ${producto.variantes[0].nombre}"`;
-
-            return {
-              texto: opciones,
-              encontrado: false,
-            };
-          }
-
-          // productos sin variantes
+      if (textoPedido.includes(categoria.categoria.toLowerCase())) {
+        let mensaje = `No has especificado qué producto de *${categoria.categoria}* deseas comprar.\n\n`;
+        mensaje += "Algunos productos de esta categoría:\n\n";
+        
+        categoria.productos.forEach(producto => {
           const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
-
-          return {
-            texto:
-              `✅ *Producto encontrado:*\n\n` +
-              `📦 ${producto.nombre}\n` +
-              `💰 Precio: $${precioFormateado}\n` +
-              `🏷️ Categoría: ${categoria.categoria}\n\n` +
-              `Para confirmar tu pedido, por favor envía los siguientes datos:\n\n` +
-              `1️⃣ Tu nombre completo\n` +
-              `2️⃣ Tu dirección de entrega (o indica si recogerás en el Monasterio)\n` +
-              `3️⃣ Tu número de teléfono\n` +
-              `4️⃣ Cantidad de unidades\n\n` +
-              `Nota: La información se usará únicamente para procesar tu pedido.`,
-            encontrado: true,
-            producto: {
-              nombre: producto.nombre,
-              precio: producto.precio,
-              categoria: categoria.categoria,
-            },
-          };
-        }
-      }
-    }
-
-    // se busca por categoría si no se encontró producto exacto
-    for (const categoria of this.productos) {
-      if (categoria.categoria.toLowerCase().includes(textoPedido)) {
-        let sugerencias = "";
-        if (categoria.productos.length > 0) {
-          sugerencias = "Algunos productos de esta categoría:\n\n";
-          categoria.productos.forEach((producto) => {
-            const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
-
-            if (producto.variantes && producto.variantes.length > 0) {
-              // si tiene variantes, mostramos opciones
-              sugerencias += `- ${producto.nombre}: $${precioFormateado}\n`;
-              sugerencias += `  Opciones: ${producto.variantes.map((v) => v.nombre).join(", ")}\n`;
-            } else {
-              sugerencias += `- ${producto.nombre}: $${precioFormateado}\n`;
-            }
-          });
-        }
-
+          
+          if (producto.variantes && producto.variantes.length > 0) {
+            mensaje += `- ${producto.nombre}: $${precioFormateado}\n`;
+            mensaje += `  Opciones disponibles:\n`;
+            
+            producto.variantes.forEach(variante => {
+              mensaje += `  • ${variante.nombre}\n`;
+            });
+            
+            // ejemplo específico para este producto
+            mensaje += `\n  Ejemplo: "Quiero comprar ${producto.nombre} ${producto.variantes[0].nombre}"\n\n`;
+          } else {
+            mensaje += `- ${producto.nombre}: $${precioFormateado}\n\n`;
+          }
+        });
+        
         return {
-          texto:
-            `No has especificado qué producto de *${categoria.categoria}* deseas comprar.\n\n` +
-            `${sugerencias}\n` +
-            `Por favor, escribe *quiero comprar* seguido del nombre exacto del producto.\n` +
-            `Ejemplo: "Quiero comprar ${
-              categoria.productos.length > 0
-                ? categoria.productos[0].nombre
-                : "un producto específico"
-            }"`,
-          encontrado: false,
+          texto: mensaje,
+          encontrado: false
         };
       }
     }
@@ -357,7 +294,8 @@ export class ProductService {
         `Lo siento, no encontré ese producto en nuestro catálogo.\n\n` +
         `👉 Asegúrate de escribir el nombre exacto como aparece en el catálogo.\n\n` +
         `Escribe *ver productos* para consultar los productos disponibles.\n` +
-        `Recuerda que debes usar el formato: "quiero comprar [nombre exacto del producto]"\n\n` +
+        `Para productos con colores u opciones, especifícalos claramente.\n` +
+        `Ejemplo: "quiero comprar De 12 cm Color blanco"\n\n` +
         `Para obtener ayuda, escribe: *ayuda*`,
       encontrado: false,
     };
@@ -407,7 +345,7 @@ export class ProductService {
   }
 
   /**
-   * Busca un producto exacto por su nombre
+   * Busca un producto exacto por su nombre, incluyendo variantes
    */
   public buscarProductoExacto(nombreProducto: string): {
     nombre: string;
@@ -416,25 +354,100 @@ export class ProductService {
   } | null {
     nombreProducto = nombreProducto.toLowerCase().trim();
 
+    // buscar coincidencias de variantes primero
+    for (const categoria of this.productos) {
+      for (const producto of categoria.productos) {
+        // si el producto tiene variantes
+        if (producto.variantes && producto.variantes.length > 0) {
+          for (const variante of producto.variantes) {
+            const nombreVariante = variante.nombre.toLowerCase();
+            const nombreProductoBase = producto.nombre.toLowerCase();
+            
+            // detectar patrones como "12 cm color blanco" o "12 cm - blanco"
+            // extraer información de tamaño y color
+            let esTamanoCorrecto = false;
+            let esColorCorrecto = false;
+            
+            // verificar si menciona el tamaño del producto
+            if (nombreProductoBase.includes("cm")) {
+              const tamanoMatch = nombreProductoBase.match(/(\d+)\s*cm/);
+              if (tamanoMatch && nombreProducto.includes(tamanoMatch[1])) {
+                esTamanoCorrecto = true;
+              }
+            } else {
+              // si no es un producto con tamaño en cm, usar otra lógica
+              esTamanoCorrecto = nombreProducto.includes(nombreProductoBase.split("-")[0].trim());
+            }
+
+            // verificar si menciona el color específico
+            if (nombreVariante.includes("color")) {
+              const colorMatch = nombreVariante.match(/color\s+(\w+)/i);
+              if (colorMatch && nombreProducto.includes(colorMatch[1].toLowerCase())) {
+                esColorCorrecto = true;
+              }
+            }
+            
+            // si coincide tanto en tamaño como en color, o hay una coincidencia exacta
+            if ((esTamanoCorrecto && esColorCorrecto) || 
+                nombreProducto.includes(nombreVariante) ||
+                (nombreProducto.includes(nombreProductoBase) && nombreProducto.includes(nombreVariante))) {
+              
+              return {
+                nombre: `${producto.nombre} - ${variante.nombre}`,
+                precio: variante.precio,
+                categoria: categoria.categoria
+              };
+            }
+          }
+        }
+      }
+    }
+
+    // si no encontró variante, intentar el método normal
+
+    // busqueda por coincidencias parciales
+    let mejorCoincidencia = null;
+    let mejorPuntuacion = 0;
+
     for (const categoria of this.productos) {
       for (const producto of categoria.productos) {
         const nombreActual = producto.nombre?.toLowerCase() || "";
 
-        if (
-          nombreActual === nombreProducto ||
-          nombreActual.includes(nombreProducto) ||
-          nombreProducto.includes(nombreActual)
-        ) {
-          return {
+        // calcular puntuación de coincidencia
+        let puntuacion = 0;
+
+        // coincidencia exacta (prioridad máxima)
+        if (nombreActual === nombreProducto) {
+          puntuacion = 100;
+        }
+        // nombre del producto está completamente dentro del texto del pedido
+        else if (nombreProducto.includes(nombreActual)) {
+          puntuacion = 75 + (nombreActual.length / nombreProducto.length) * 20;
+        }
+        // texto del pedido está completamente dentro del nombre del producto
+        else if (nombreActual.includes(nombreProducto)) {
+          puntuacion = 50 + (nombreProducto.length / nombreActual.length) * 20;
+        }
+
+        // bonus si la categoría también está mencionada en el pedido
+        if (puntuacion > 0 && nombreProducto.includes(categoria.categoria.toLowerCase())) {
+          puntuacion += 25;
+        }
+
+        // actualizar la mejor coincidencia si encontramos una mejor
+        if (puntuacion > mejorPuntuacion) {
+          mejorPuntuacion = puntuacion;
+          mejorCoincidencia = {
             nombre: producto.nombre,
             precio: producto.precio,
-            categoria: categoria.categoria,
+            categoria: categoria.categoria
           };
         }
       }
     }
 
-    return null;
+    // solo devolver coincidencias que superen cierto umbral
+    return mejorPuntuacion > 40 ? mejorCoincidencia : null;
   }
 
   /**
@@ -443,9 +456,9 @@ export class ProductService {
   public buscarProductoEnCategoria(nombreCategoria: string, nombreProducto: string): Producto | null {
     const categoriaIndex = this.obtenerIndiceCategoria(nombreCategoria);
     if (categoriaIndex === -1) return null;
-    
+
     const categoria = this.productos[categoriaIndex];
-    return categoria.productos.find(p => 
+    return categoria.productos.find((p) =>
       p.nombre.toLowerCase().includes(nombreProducto.toLowerCase())
     ) || null;
   }
@@ -454,15 +467,15 @@ export class ProductService {
    * Obtiene el índice de una categoría por nombre o número
    */
   public obtenerIndiceCategoria(seleccion: string): number {
-    // Verificar si es un número
+    // verificar si es un número
     const seleccionNumero = parseInt(seleccion);
-    
+
     if (!isNaN(seleccionNumero) && seleccionNumero > 0 && seleccionNumero <= this.productos.length) {
       return seleccionNumero - 1;
     }
-    
-    // Buscar por nombre
-    return this.productos.findIndex(cat => 
+
+    // buscar por nombre
+    return this.productos.findIndex(cat =>
       cat.categoria.toLowerCase().includes(seleccion.toLowerCase())
     );
   }
@@ -474,7 +487,7 @@ export class ProductService {
     try {
       if (producto && producto.imagen) {
         const mediaPath = path.resolve(process.cwd(), 'src/data', producto.imagen);
-        
+
         if (fs.existsSync(mediaPath)) {
           return MessageMedia.fromFilePath(mediaPath);
         }

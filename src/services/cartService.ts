@@ -1,4 +1,5 @@
 import logger from '../utils/logger';
+import { ICartService } from '../interfaces/services';
 
 export interface CartItem {
   nombre: string;
@@ -7,7 +8,7 @@ export interface CartItem {
   cantidad: number;
 }
 
-export class CartService {
+export class CartService implements ICartService {
   private carts: Map<string, CartItem[]>;
   
   constructor() {
