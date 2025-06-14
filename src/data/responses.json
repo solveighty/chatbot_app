@@ -1,0 +1,24 @@
+{
+  "saludos": [
+    "¡Hola! ¿Cómo puedo ayudarte hoy?",
+    "¡Qué gusto verte! ¿En qué necesitas ayuda?",
+    "¡Bienvenido/a! ¿Qué deseas consultar?",
+    "¡Hola hola! Estoy aquí para ayudarte.",
+    "¡Bendiciones! ¿Qué producto deseas hoy?"
+  ],
+  "despedidas": [
+    "¡Gracias por escribirnos! Que tengas un lindo día.",
+    "Nos vemos pronto. ¡Dios te bendiga!",
+    "¡Pedido recibido! Te esperamos en el monasterio."
+  ],
+  "agradecimientos": [
+    "¡Gracias a ti por tu interés!",
+    "Es un placer poder ayudarte.",
+    "Gracias por contactarnos, estamos para servirte."
+  ],
+  "default": [
+    "Disculpa, no entendí tu mensaje. ¿Podrías reformularlo?",
+    "No estoy seguro de cómo responder a eso. ¿Puedes ser más específico?",
+    "Hmm, ¿me podrías explicar mejor en qué te puedo ayudar?"
+  ]
+}
