@@ -1,0 +1,25 @@
+{
+  "name": "whatsapp-chatbot",
+  "version": "1.0.0",
+  "description": "A chatbot for WhatsApp using whatsapp-web.js",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "npm run build && node dist/app.js",
+    "build": "tsc",
+    "dev": "ts-node src/app.ts"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "whatsapp-web.js": "^1.18.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.5.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "license": "MIT"
+}
