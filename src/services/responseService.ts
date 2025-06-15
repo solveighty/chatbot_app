@@ -83,7 +83,10 @@ export class ResponseService implements IResponseService {
            `5️⃣ Puedes añadir más productos a tu carrito repitiendo los pasos anteriores\n\n` +
            `6️⃣ Cuando termines de agregar productos, escribe *carrito* para ver tu selección\n\n` +
            `7️⃣ Escribe *finalizar compra* para proceder al pago\n\n` +
-           `8️⃣ Proporciona tus datos de contacto cuando se te soliciten\n\n` +
+           `8️⃣ Proporciona tus datos completos de contacto cuando se te soliciten:\n` +
+           `   • Nombre completo\n` +
+           `   • Dirección de entrega\n` +
+           `   • Número de teléfono\n\n` +
            `9️⃣ Confirma tu pedido\n\n` +
            `📌 *Comandos del carrito:*\n` +
            `➕ *añadir [cantidad] [producto]* - Ejemplo: añadir 2 Frasco de 500 ml\n` +

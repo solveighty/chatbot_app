@@ -2,6 +2,7 @@ import { Message, MessageMedia } from 'whatsapp-web.js';
 import { ICartService, IConversationStateManager, IProductService, IResponseService } from '../interfaces/services';
 import { CommandHandler } from '../handlers/commandHandler';
 import logger from '../utils/logger';
+import { DataValidator } from '../utils/validators';
 
 export class BotService {
   constructor(
@@ -146,9 +147,25 @@ export class BotService {
     const carrito = this.cartService.getCart(userId);
     
     if (etapaPedido === 'datos_cliente') {
-      // guardar los datos del cliente
+      // validar datos del cliente
+      const datosCliente = DataValidator.validarDatosCliente(mensaje);
+      
+      if (!datosCliente.valido) {
+        return `❌ *Los datos proporcionados no son válidos*\n\n` +
+               `Por favor, proporciona la siguiente información en formato correcto:\n\n` +
+               `1️⃣ *Tu nombre completo* (mínimo 3 caracteres)\n` +
+               `2️⃣ *Tu dirección de entrega* (o indica si recogerás en el Monasterio)\n` +
+               `3️⃣ *Tu número de teléfono* (formato válido)\n\n` +
+               `Ejemplo:\n` +
+               `María Pérez\n` +
+               `Calle Principal 123, Ciudad\n` +
+               `0991234567`;
+      }
+      
+      // guardar los datos validados del cliente
       this.stateManager.updateState(userId, {
-        datosCliente: mensaje,
+        datosCliente: datosCliente,
+        datosClienteTexto: mensaje,
         etapaPedido: 'confirmacion',
       });
       
@@ -158,6 +175,7 @@ export class BotService {
       carrito.forEach((item, index) => {
         const subtotal = item.precio * item.cantidad;
         const precioFormateado = item.precio.toFixed(2).replace('.', ',');
+
         const subtotalFormateado = subtotal.toFixed(2).replace('.', ',');
         
         resumen += `${index + 1}. ${item.nombre} (${item.categoria})\n` +
@@ -168,14 +186,20 @@ export class BotService {
       const totalFormateado = total.toFixed(2).replace('.', ',');
       
       resumen += `💰 *Total a pagar: $${totalFormateado}*\n\n`;
-      resumen += `👤 *Datos proporcionados:*\n${mensaje}\n\n`;
+      resumen += `👤 *Datos del cliente:*\n`;
+      resumen += `📝 Nombre: ${datosCliente.nombre}\n`;
+      resumen += `🏠 Dirección: ${datosCliente.direccion}\n`;
+      resumen += `📱 Teléfono: ${datosCliente.telefono}\n\n`;
       resumen += `¿Deseas confirmar este pedido? Responde con *SI* para confirmar o *NO* para cancelar.`;
       
       return resumen;
     }
     
     if (etapaPedido === 'confirmacion') {
-      if (mensaje.toLowerCase() === 'si' || mensaje.toLowerCase() === 'sí') {        
+      if (mensaje.toLowerCase() === 'si' || mensaje.toLowerCase() === 'sí') {
+        // obtener los datos validados
+        const datosCliente = state.datosCliente;
+        
         // limpiar el carrito después de la compra
         const total = this.cartService.getCartTotal(userId);
         const totalFormateado = total.toFixed(2).replace('.', ',');
@@ -187,8 +211,8 @@ export class BotService {
         });
         
         return `✅ *¡Pedido confirmado!*\n\n` +
-               `Tu pedido por un total de $${totalFormateado} ha sido registrado.\n\n` +
-               `Una hermana del monasterio se pondrá en contacto contigo pronto para coordinar el pago y la entrega.\n\n` +
+               `Tu pedido por un total de $${totalFormateado} ha sido registrado a nombre de ${datosCliente.nombre}.\n\n` +
+               `Una hermana del monasterio se pondrá en contacto contigo al ${datosCliente.telefono} pronto para coordinar el pago y la entrega.\n\n` +
                `¡Gracias por tu compra! Dios te bendiga.`;
       } else {
         this.cartService.clearCart(userId);
