@@ -16,26 +16,61 @@
   "agradecimientos": [
     "¡Gracias a ti por tu interés!",
     "Es un placer poder ayudarte.",
-    "Gracias por contactarnos, estamos para servirte."
+    "Gracias por contactarnos, estamos para servirte.",
+    "Agradecemos tu confianza en nosotras.",
+    "Muchas gracias por escribirnos.",
+    "¡Qué alegría saber de ti! Gracias por tu mensaje.",
+    "Tu mensaje nos alegra el día. ¡Gracias!",
+    "Gracias por apoyar nuestro trabajo artesanal.",
+    "Siempre estamos felices de atenderte. ¡Gracias!",
+    "Valoramos mucho tu apoyo. ¡Gracias por estar aquí!"
   ],
   "productos": [
     "Tenemos varios productos artesanales. Escribe *ver productos* para ver la lista completa.",
     "Nuestros productos son elaborados con dedicación y oración. Escribe *ver productos* para conocer nuestro catálogo.",
-    "Las hermanas del monasterio elaboran productos de alta calidad. Escribe *ver productos* para más información."
+    "Las hermanas del monasterio elaboran productos de alta calidad. Escribe *ver productos* para más información.",
+    "Contamos con ungüentos, jabones, cremas y más. Escribe *ver productos* para conocerlos.",
+    "Todos nuestros productos están hechos a mano y con ingredientes naturales.",
+    "Puedes revisar nuestro catálogo actualizado escribiendo *ver productos*.",
+    "Cada producto lleva una intención de oración y cuidado especial.",
+    "Nuestro catálogo incluye productos únicos y elaborados por las hermanas.",
+    "Descubre la variedad de productos que tenemos escribiendo *ver productos*.",
+    "Todos los productos tienen descripciones detalladas en el catálogo."
   ],
   "compra": [
     "Para comprar, escribe: *quiero comprar* seguido del nombre exacto del producto. Por ejemplo: 'quiero comprar Frasco de 500 ml'",
     "Si deseas adquirir algún producto, escribe: *quiero comprar* y el nombre exacto del producto como aparece en el catálogo.",
-    "¿Te interesa algún producto? Escribe: *quiero comprar* seguido del nombre exacto del producto que deseas."
+    "¿Te interesa algún producto? Escribe: *quiero comprar* seguido del nombre exacto del producto que deseas.",
+    "Una vez elijas un producto, solo escribe *quiero comprar* seguido del nombre.",
+    "Recuerda revisar el catálogo antes de hacer tu pedido para copiar bien el nombre del producto.",
+    "Puedes hacer tu pedido en cualquier momento escribiendo *quiero comprar* + el nombre del producto.",
+    "Si ya viste un producto que te gusta, ¡adelante! Solo escribe *quiero comprar* y su nombre.",
+    "Te ayudaremos en cada paso de la compra si escribes *quiero comprar* seguido del producto.",
+    "Después de escribir *quiero comprar*, recibirás instrucciones para finalizar tu pedido.",
+    "Todos los pedidos se procesan con amor y dedicación. Solo escribe *quiero comprar* para empezar."
   ],
   "ayuda": [
     "Para usar este bot, escribe *ver productos* para ver el catálogo, y luego *quiero comprar* seguido del nombre exacto del producto que deseas.",
     "Si necesitas ayuda para hacer un pedido, escribe *ayuda* en cualquier momento.",
-    "Para comprar correctamente, debes escribir el nombre exacto del producto como aparece en el catálogo."
+    "Para comprar correctamente, debes escribir el nombre exacto del producto como aparece en el catálogo.",
+    "¿Tienes dudas sobre cómo usar el bot? Escribe *ayuda* y con gusto te guiamos.",
+    "También puedes escribir *ver productos* si aún no sabes qué deseas comprar.",
+    "Estamos aquí para ayudarte. Solo escribe *ayuda* y te mostraremos cómo hacer tu pedido.",
+    "Para más detalles sobre cómo funciona la compra, escribe *ayuda* en cualquier momento.",
+    "Si el nombre del producto tiene errores, el bot no lo reconocerá. Verifica el catálogo antes.",
+    "¿No sabes por dónde empezar? Escribe *ayuda* y te guiamos paso a paso.",
+    "Recuerda que puedes escribir *ver productos* para conocer el catálogo y *ayuda* si tienes dudas."
   ],
   "default": [
     "Disculpa, no entendí tu mensaje. Para ver nuestro catálogo, escribe *ver productos*. Para obtener ayuda, escribe *ayuda*.",
     "No estoy seguro de cómo responder. ¿Te gustaría ver nuestros productos? Escribe *ver productos*. Para instrucciones, escribe *ayuda*.",
-    "Hmm, ¿me podrías explicar mejor en qué te puedo ayudar? Para instrucciones sobre cómo usar este bot, escribe *ayuda*."
+    "Hmm, ¿me podrías explicar mejor en qué te puedo ayudar? Para instrucciones sobre cómo usar este bot, escribe *ayuda*.",
+    "Lo siento, ese mensaje no coincide con ninguno de nuestros comandos. Prueba con *ver productos* o *ayuda*.",
+    "Parece que no entendí bien. Puedes empezar escribiendo *ver productos* para ver el catálogo.",
+    "No reconozco ese mensaje. Si necesitas asistencia, escribe *ayuda*.",
+    "Tal vez hubo un error al escribir. ¿Intentas ver productos o hacer una compra? Escribe *ver productos* o *quiero comprar*.",
+    "Intenta escribir *ayuda* para recibir una guía sobre cómo usar este bot.",
+    "No logro procesar tu mensaje. ¿Quieres ver productos o necesitas ayuda? Estoy aquí para asistirte.",
+    "Tu mensaje no se entiende claramente. Por favor, escribe *ayuda* o *ver productos* para comenzar."
   ]
 }
