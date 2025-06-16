@@ -95,36 +95,69 @@ export class CommandHandler {
     // para añadir al carrito
     if (messageLower.startsWith('añadir') || messageLower.startsWith('anadir') || messageLower.startsWith('agregar')) {
       const partes = messageLower.split(' ');
-      if (partes.length < 3) {
-        return {
-          response: "Para añadir un producto, escribe: *añadir [cantidad] [nombre del producto]*\n" +
-                  "Ejemplo: añadir 2 Frasco de 500 ml"
-        };
+      
+      // si solo escribe "añadir [producto]" sin cantidad
+      if (partes.length >= 2) {
+        // ver si el segundo elemento es un número
+        const posibleCantidad = parseInt(partes[1]);
+        
+        if (!isNaN(posibleCantidad) && posibleCantidad > 0) {
+          // caso "añadir 2 Frasco de 500 ml"
+          const cantidadStr = partes[1];
+          const cantidad = parseInt(cantidadStr);
+          
+          const nombreProducto = message.substring(message.indexOf(cantidadStr) + cantidadStr.length).trim();
+          
+          // producto exacto
+          const producto = this.productService.buscarProductoExacto(nombreProducto);
+          if (!producto) {
+            return {
+              response: `No encontré el producto "${nombreProducto}". Verifica el nombre exacto en el catálogo.`
+            };
+          }
+          
+          // añade al carrito
+          this.cartService.addItemToCart(userId, producto, cantidad);
+          return {
+            response: `✅ Añadido al carrito: ${producto.nombre} x${cantidad}\n\n` +
+                    `Precio por unidad: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
+                    `Total: $${(producto.precio * cantidad).toFixed(2).replace('.', ',')}\n\n` +
+                    `Escribe *carrito* para ver tu carrito de compras.`
+          };
+        } else {
+          // caso "añadir Frasco de 500 ml" sin cantidad
+          const nombreProducto = message.substring(message.indexOf(partes[0]) + partes[0].length).trim();
+          
+          // producto exacto
+          const producto = this.productService.buscarProductoExacto(nombreProducto);
+          if (!producto) {
+            return {
+              response: `No encontré el producto "${nombreProducto}". Verifica el nombre exacto en el catálogo.`
+            };
+          }
+          
+          // devolver un resultado especial para que BotService pregunte la cantidad
+          return {
+            response: `✅ *Producto encontrado:*\n\n` +
+                     `📦 ${producto.nombre}\n` +
+                     `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
+                     `🏷️ Categoría: ${producto.categoria}\n\n` +
+                     `*¿Cuántas unidades deseas añadir al carrito?*\n` +
+                     `Responde con un número (ejemplo: 2)`,
+            stateUpdates: {
+              lastCategory: 'solicitar_cantidad',
+              productoSeleccionado: producto,
+              timestamp: new Date()
+            }
+          };
+        }
       }
       
-      const cantidadStr = partes[1];
-      const cantidad = parseInt(cantidadStr);
-      if (isNaN(cantidad) || cantidad <= 0) {
-        return {
-          response: "Por favor, indica una cantidad válida. Ejemplo: *añadir 2 Frasco de 500 ml*"
-        };
-      }
-      
-      const nombreProducto = message.substring(message.indexOf(cantidadStr) + cantidadStr.length).trim();
-      
-      // producto exacto
-      const producto = this.productService.buscarProductoExacto(nombreProducto);
-      if (!producto) {
-        return {
-          response: `No encontré el producto "${nombreProducto}". Verifica el nombre exacto en el catálogo.`
-        };
-      }
-      
-      // añade al carrito
-      this.cartService.addItemToCart(userId, producto, cantidad);
       return {
-        response: `✅ Añadido al carrito: ${producto.nombre} x${cantidad}\n\n` +
-                `Escribe *carrito* para ver tu carrito de compras.`
+        response: "Para añadir un producto, escribe: *añadir [producto]* o *añadir [cantidad] [producto]*\n" +
+                 "Ejemplos:\n" +
+                 "• añadir Frasco de 500 ml\n" +
+                 "• añadir 2 Frasco de 500 ml"
       };
     }
     

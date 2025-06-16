@@ -80,16 +80,18 @@ export class ResponseService implements IResponseService {
            `4️⃣ Para productos con colores o variantes:\n` +
            `   ✅ Ejemplo: "quiero comprar De 12 cm Color blanco"\n` +
            `   ✅ Ejemplo: "quiero comprar Fundas Ecológicas Color café"\n\n` +
-           `5️⃣ Puedes añadir más productos a tu carrito repitiendo los pasos anteriores\n\n` +
-           `6️⃣ Cuando termines de agregar productos, escribe *carrito* para ver tu selección\n\n` +
-           `7️⃣ Escribe *finalizar compra* para proceder al pago\n\n` +
-           `8️⃣ Proporciona tus datos completos de contacto cuando se te soliciten:\n` +
+           `5️⃣ *Indica la cantidad de unidades* cuando se te pregunte\n\n` +
+           `6️⃣ Puedes añadir más productos a tu carrito repitiendo los pasos anteriores\n\n` +
+           `7️⃣ Cuando termines de agregar productos, escribe *carrito* para ver tu selección\n\n` +
+           `8️⃣ Escribe *finalizar compra* para proceder al pago\n\n` +
+           `9️⃣ Proporciona tus datos completos de contacto cuando se te soliciten:\n` +
            `   • Nombre completo\n` +
            `   • Dirección de entrega\n` +
            `   • Número de teléfono\n\n` +
-           `9️⃣ Confirma tu pedido\n\n` +
+           `🔟 Confirma tu pedido\n\n` +
            `📌 *Comandos del carrito:*\n` +
-           `➕ *añadir [cantidad] [producto]* - Ejemplo: añadir 2 Frasco de 500 ml\n` +
+           `➕ *añadir [producto]* - Añadir producto (te preguntará la cantidad)\n` +
+           `➕ *añadir [cantidad] [producto]* - Añadir cantidad específica\n` +
            `➖ *quitar [número]* - Elimina un producto por su número en el carrito\n` +
            `🛒 *carrito* - Ver tu carrito actual\n` +
            `❌ *vaciar carrito* - Elimina todos los productos\n` +

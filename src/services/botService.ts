@@ -19,13 +19,52 @@ export class BotService {
       const userMessage = message.body;
       const userMessageLower = userMessage.toLowerCase();
       
-      logger.info(`Generando respuesta para: "${userMessage}"`);
+      logger.info(`Generando respuesta para: "${userMessage}" de usuario: ${userId}`);
       
-      // se verifica si el mensaje es un comando
+      // se verifica el estado actual de la conversación antes de cualquier procesamiento
+      const state = this.stateManager.getState(userId);
+      
+      // procesar respuesta a solicitud de cantidad (mayor prioridad)
+      if (state && state.lastCategory === 'solicitar_cantidad') {
+        // intentar obtener un número válido
+        const cantidad = parseInt(userMessage);
+        
+        if (isNaN(cantidad) || cantidad <= 0) {
+          return `Por favor, indica una cantidad válida usando solo números.\n` +
+                 `Ejemplo: *2* para añadir dos unidades.`;
+        }
+        
+        // si tenemos un número válido, añadir al carrito
+        const producto = state.productoSeleccionado;
+        if (producto) {
+          this.cartService.addItemToCart(userId, producto, cantidad);
+          
+          // actualizar el estado para salir del flujo de solicitud de cantidad
+          this.stateManager.updateState(userId, {
+            lastCategory: 'producto_agregado',
+            lastProductAdded: producto,
+            timestamp: new Date()
+          });
+          
+          return `✅ *Producto añadido al carrito:*\n\n` +
+                 `📦 ${producto.nombre}\n` +
+                 `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')} x ${cantidad} = $${(producto.precio * cantidad).toFixed(2).replace('.', ',')}\n` +
+                 `🏷️ Categoría: ${producto.categoria}\n\n` +
+                 `🛒 Escribe *carrito* para ver todos los productos seleccionados.\n` +
+                 `➕ Puedes seguir añadiendo más productos escribiendo *quiero comprar [producto]*.\n` +
+                 `✅ Cuando termines, escribe *finalizar compra* para proceder al pago.`;
+        } else {
+          // si por alguna razón no tenemos el producto en el estado
+          return `Lo siento, ha ocurrido un error. Por favor, intenta seleccionar el producto nuevamente.`;
+        }
+      }
+      
+      // a partir de aquí continúa con el flujo normal
+      // verificar si es un comando...
       const commandResult = await this.commandHandler.handleCommand(
         userMessage, 
         userId, 
-        this.stateManager.getState(userId)
+        state
       );
       
       if (commandResult.response) {
@@ -36,9 +75,13 @@ export class BotService {
         return commandResult.response;
       }
       
-      // se verifica si es comando de carrito
+      // verificar si es comando de carrito
       const cartCommandResult = await this.commandHandler.handleCartCommands(userMessage, userId);
       if (cartCommandResult?.response) {
+        // si hay actualizaciones de estado, las aplicamos
+        if (cartCommandResult.stateUpdates) {
+          this.stateManager.updateState(userId, cartCommandResult.stateUpdates);
+        }
         return cartCommandResult.response;
       }
       
@@ -49,29 +92,30 @@ export class BotService {
         const resultado = this.productService.procesarPedido(userMessage);
         
         if (resultado.encontrado && resultado.producto) {
-          this.cartService.addItemToCart(userId, resultado.producto, 1);
+          // en vez de añadir directamente, guardar el producto en estado y preguntar cantidad
+          this.stateManager.updateState(userId, {
+            lastCategory: 'solicitar_cantidad',
+            productoSeleccionado: resultado.producto,
+            timestamp: new Date()
+          });
           
-          return `✅ *Producto añadido al carrito:*\n\n` +
+          return `✅ *Producto encontrado:*\n\n` +
                  `📦 ${resultado.producto.nombre}\n` +
                  `💰 Precio: $${resultado.producto.precio.toFixed(2).replace('.', ',')}\n` +
                  `🏷️ Categoría: ${resultado.producto.categoria}\n\n` +
-                 `🛒 Escribe *carrito* para ver todos los productos seleccionados.\n` +
-                 `➕ Puedes seguir añadiendo más productos escribiendo *quiero comprar [producto]*.\n` +
-                 `✅ Cuando termines, escribe *finalizar compra* para proceder al pago.`;
+                 `*¿Cuántas unidades deseas añadir al carrito?*\n` +
+                 `Responde con un número (ejemplo: 2)`;
         }
         
         return resultado.texto;
       }
-
-      // se verifica el estado actual de la conversación
-      const state = this.stateManager.getState(userId);
       
-      // estado checkout
+      // procesar estado de checkout
       if (state && state.lastCategory === 'checkout') {
         return this.procesarCheckout(userId, userMessage);
       }
       
-      // estado de selección de cat images
+      // procesar estado de selección de categoría de imágenes
       if (state && state.lastCategory === 'menu_categorias') {
         // si el mensaje parece ser un nombre de producto específico
         const categoriaActual = state.categoriaSeleccionada;
@@ -108,7 +152,7 @@ export class BotService {
       // manejo de mensajes por número o categoría sin context previo
       if ((/^\d+$/.test(userMessageLower) || this.esPosibleCategoria(userMessageLower)) && 
           !state?.lastCategory) {
-        // se asume que el usuario intenta seleccionar una categoría sin ver el menú primero
+        // asumimos que el usuario intenta seleccionar una categoría sin ver el menú primero
         this.stateManager.updateState(userId, { lastCategory: 'menu_categorias', timestamp: new Date() });
         const resultado = await this.productService.procesarSeleccionCategoria(userMessage);
         
