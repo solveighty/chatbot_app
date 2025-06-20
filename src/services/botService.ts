@@ -3,6 +3,8 @@ import { ICartService, IConversationStateManager, IProductService, IResponseServ
 import { CommandHandler } from '../handlers/commandHandler';
 import logger from '../utils/logger';
 import { DataValidator } from '../utils/validators';
+import { InvoiceGenerator } from '../utils/invoiceGenerator';
+import fs from 'fs-extra';
 
 export class BotService {
   constructor(
@@ -13,7 +15,7 @@ export class BotService {
     private readonly commandHandler: CommandHandler
   ) {}
 
-  public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia }> {
+  public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia }> {
     try {
       const userId = message.from;
       const userMessage = message.body;
@@ -185,13 +187,13 @@ export class BotService {
   /**
    * Procesa el checkout del pedido
    */
-  private procesarCheckout(userId: string, mensaje: string): string {
+  private async procesarCheckout(userId: string, mensaje: string): Promise<string | { text: string, invoiceMedia?: MessageMedia }> {
     const state = this.stateManager.getState(userId);
     const { etapaPedido } = state;
     const carrito = this.cartService.getCart(userId);
     
     if (etapaPedido === 'datos_cliente') {
-      // validar datos del cliente
+      // Validar datos del cliente
       const datosCliente = DataValidator.validarDatosCliente(mensaje);
       
       if (!datosCliente.valido) {
@@ -206,20 +208,19 @@ export class BotService {
                `0991234567`;
       }
       
-      // guardar los datos validados del cliente
+      // Guardar los datos validados del cliente
       this.stateManager.updateState(userId, {
         datosCliente: datosCliente,
         datosClienteTexto: mensaje,
         etapaPedido: 'confirmacion',
       });
       
-      // generar resumen del pedido
+      // Generar resumen del pedido
       let resumen = `¡Gracias por proporcionar tus datos!\n\n*Resumen de tu pedido:*\n\n`;
       
       carrito.forEach((item, index) => {
         const subtotal = item.precio * item.cantidad;
         const precioFormateado = item.precio.toFixed(2).replace('.', ',');
-
         const subtotalFormateado = subtotal.toFixed(2).replace('.', ',');
         
         resumen += `${index + 1}. ${item.nombre} (${item.categoria})\n` +
@@ -241,23 +242,73 @@ export class BotService {
     
     if (etapaPedido === 'confirmacion') {
       if (mensaje.toLowerCase() === 'si' || mensaje.toLowerCase() === 'sí') {
-        // obtener los datos validados
-        const datosCliente = state.datosCliente;
-        
-        // limpiar el carrito después de la compra
-        const total = this.cartService.getCartTotal(userId);
-        const totalFormateado = total.toFixed(2).replace('.', ',');
-        this.cartService.clearCart(userId);
-        
-        this.stateManager.updateState(userId, {
-          lastCategory: 'pedido_completo',
-          etapaPedido: 'completado'
-        });
-        
-        return `✅ *¡Pedido confirmado!*\n\n` +
-               `Tu pedido por un total de $${totalFormateado} ha sido registrado a nombre de ${datosCliente.nombre}.\n\n` +
-               `Una hermana del monasterio se pondrá en contacto contigo al ${datosCliente.telefono} pronto para coordinar el pago y la entrega.\n\n` +
-               `¡Gracias por tu compra! Dios te bendiga.`;
+        try {
+          // Obtener los datos validados
+          const datosCliente = state.datosCliente;
+          
+          // Generar número de factura
+          const invoiceNumber = InvoiceGenerator.generateInvoiceNumber();
+          
+          // Crear datos para la factura
+          const invoiceData = {
+            cliente: {
+              nombre: datosCliente.nombre,
+              direccion: datosCliente.direccion,
+              telefono: datosCliente.telefono,
+            },
+            items: carrito,
+            total: this.cartService.getCartTotal(userId),
+            fecha: new Date(),
+            invoiceNumber: invoiceNumber,
+          };
+          
+          // Generar el PDF de la factura
+          const pdfPath = await InvoiceGenerator.generateInvoicePDF(invoiceData);
+          
+          // Cargar el PDF como MessageMedia
+          const pdfBuffer = fs.readFileSync(pdfPath);
+          const invoiceMedia = new MessageMedia(
+            'application/pdf',
+            pdfBuffer.toString('base64'),
+            `factura-${invoiceNumber}.pdf`
+          );
+          
+          // Guardar el número de factura y data en el estado para referencia futura
+          this.stateManager.updateState(userId, {
+            lastCategory: 'pedido_completo',
+            etapaPedido: 'completado',
+            facturaNumero: invoiceNumber,
+            facturaPath: pdfPath
+          });
+          
+          const total = this.cartService.getCartTotal(userId);
+          const totalFormateado = total.toFixed(2).replace('.', ',');
+          
+          // Limpiar el carrito después de la compra
+          this.cartService.clearCart(userId);
+          
+          // Programar limpieza de archivos antiguos
+          setTimeout(() => {
+            InvoiceGenerator.cleanupOldInvoices(24); // Limpiar archivos de hace más de 24 horas
+          }, 60000); // Ejecutar en 1 minuto
+          
+          return {
+            text: `✅ *¡Pedido confirmado!*\n\n` +
+                `Tu pedido Nº ${invoiceNumber} por un total de $${totalFormateado} ha sido registrado a nombre de ${datosCliente.nombre}.\n\n` +
+                `Una hermana del monasterio se pondrá en contacto contigo al ${datosCliente.telefono} pronto para coordinar el pago y la entrega.\n\n` +
+                `A continuación te enviamos tu factura digital en formato PDF.\n\n` +
+                `¡Gracias por tu compra! Dios te bendiga.`,
+            invoiceMedia: invoiceMedia
+          };
+        } catch (error) {
+          logger.error(`Error al generar factura PDF: ${error}`);
+          
+          // En caso de error, enviar solo el mensaje sin factura
+          return `✅ *¡Pedido confirmado!*\n\n` +
+                `Tu pedido ha sido registrado correctamente a nombre de ${state.datosCliente.nombre}.\n\n` +
+                `Una hermana del monasterio se pondrá en contacto contigo pronto para coordinar el pago y la entrega.\n\n` +
+                `¡Gracias por tu compra! Dios te bendiga.`;
+        }
       } else {
         this.cartService.clearCart(userId);
         
@@ -273,7 +324,7 @@ export class BotService {
     
     return `Por favor, proporciona la información solicitada para continuar con tu pedido.`;
   }
-
+  
   private esPosibleCategoria(mensaje: string): boolean {
     const categorias = this.productService.getCategorias();
     return categorias.some(categoria => 

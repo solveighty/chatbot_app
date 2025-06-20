@@ -4,11 +4,11 @@ import logger from '../utils/logger';
 
 export class WhatsAppClient {
     private client: Client;
-    private messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia } | undefined>;
+    private messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia } | undefined>;
 
     constructor(
         options: ClientOptions,
-        messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia } | undefined>
+        messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia } | undefined>
     ) {
         this.client = new Client({
             authStrategy: new LocalAuth(),
@@ -40,6 +40,16 @@ export class WhatsAppClient {
                 try {
                     if (typeof response === 'string') {
                         await message.reply(response);
+                    } else if (response.invoiceMedia) {
+                        // Enviar el mensaje de confirmación
+                        await message.reply(response.text);
+                        
+                        // Esperar un segundo y enviar la factura como PDF
+                        setTimeout(async () => {
+                            await message.reply(response.invoiceMedia as MessageMedia, undefined, {
+                                caption: `📝 Factura de tu pedido`
+                            });
+                        }, 1000);
                     } else if (response.media) {
                         await this.client.sendMessage(message.from, response.media, { 
                             caption: response.text 
