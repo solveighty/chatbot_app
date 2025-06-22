@@ -4,27 +4,28 @@ import { ResponseService } from "../services/responseService";
 import { CommandHandler } from "../handlers/commandHandler";
 import { ConversationStateManager } from "../services/conversationStateManager";
 import { BotService } from "../services/botService";
+import { OrderService } from "../services/orderService";
 
 export function setupDependencies() {
-  // crear instancias de servicios
-  // que serán utilizados por el bot
+  // Crear instancias de servicios
   const responseService = new ResponseService();
   const productService = new ProductService();
   const cartService = new CartService();
   const stateManager = new ConversationStateManager();
+  const orderService = new OrderService();
   
-  // crear instancia del manejador de comandos
-  // que utiliza los servicios creados
+  // Crear instancia del manejador de comandos
   const commandHandler = new CommandHandler(productService, cartService, responseService);
   
-  // servicio principal del bot
+  // Servicio principal del bot
   const botService = new BotService(
     responseService,
     productService,
     cartService,
     stateManager,
-    commandHandler
+    commandHandler,
+    orderService
   );
   
-  return { botService };
+  return { botService, orderService };
 }

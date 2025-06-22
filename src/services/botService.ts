@@ -5,6 +5,7 @@ import logger from '../utils/logger';
 import { DataValidator } from '../utils/validators';
 import { InvoiceGenerator } from '../utils/invoiceGenerator';
 import fs from 'fs-extra';
+import { OrderService } from './orderService';
 
 export class BotService {
   constructor(
@@ -12,7 +13,8 @@ export class BotService {
     private readonly productService: IProductService,
     private readonly cartService: ICartService,
     private readonly stateManager: IConversationStateManager,
-    private readonly commandHandler: CommandHandler
+    private readonly commandHandler: CommandHandler,
+    private readonly orderService: OrderService
   ) {}
 
   public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia }> {
@@ -261,6 +263,19 @@ export class BotService {
             fecha: new Date(),
             invoiceNumber: invoiceNumber,
           };
+          
+          // Guardar el pedido en el sistema
+          this.orderService.saveOrder({
+            orderId: invoiceNumber,
+            clientName: datosCliente.nombre,
+            clientAddress: datosCliente.direccion,
+            clientPhone: datosCliente.telefono,
+            items: carrito,
+            total: this.cartService.getCartTotal(userId),
+            status: 'pending',
+            date: new Date().toISOString(),
+            notes: `Pedido realizado por WhatsApp (${userId})`
+          });
           
           // Generar el PDF de la factura
           const pdfPath = await InvoiceGenerator.generateInvoicePDF(invoiceData);

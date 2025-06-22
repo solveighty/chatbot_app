@@ -33,6 +33,7 @@ Thumbs.db
 # Archivos temporales
 tmp/
 temp/
+/data
 
 # Archivos de cobertura y pruebas
 coverage/
