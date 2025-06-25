@@ -186,18 +186,22 @@ export class InvoiceGenerator {
     
     // Línea horizontal para cerrar la tabla
     doc.moveTo(50, tableRow + 5).lineTo(550, tableRow + 5).stroke();
-    doc.moveDown(2);
+    
+    // Añadir un espacio adicional después de la línea divisoria
+    tableRow += 20; // Aumentar este valor para dar más espacio
+    doc.y = tableRow; // Establecer explícitamente la posición Y para el siguiente texto
     
     // Totales
     const iva = 0;
     const totalConIva = subtotal + iva;
     
     doc.fontSize(12);
-    doc.text(`Subtotal: $${subtotal.toFixed(2).replace(".", ",")}`, 350);
-    doc.text(`IVA (0%): $${iva.toFixed(2).replace(".", ",")}`, 350);
-    doc.fontSize(14).text(`TOTAL: $${totalConIva.toFixed(2).replace(".", ",")}`, 350);
+    doc.text(`Subtotal: $${subtotal.toFixed(2).replace(".", ",")}`, 350, tableRow);
+    doc.text(`IVA (0%): $${iva.toFixed(2).replace(".", ",")}`, 350, tableRow + 20);
+    doc.fontSize(14).text(`TOTAL: $${totalConIva.toFixed(2).replace(".", ",")}`, 350, tableRow + 40);
     
-    doc.moveDown(2);
+    // Actualizar la posición Y para el siguiente bloque de contenido
+    doc.y = tableRow + 70; // Posicionarse después de todos los totales
     
     // Información final
     doc.fontSize(12).text('¡GRACIAS POR SU COMPRA!', { align: 'center' });
