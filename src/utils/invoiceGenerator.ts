@@ -60,7 +60,7 @@ export class InvoiceGenerator {
 
     // Cabecera de la factura
     let factura = `*FACTURA DE COMPRA*\n` +
-                  `*Monasterio de la Trapa*\n\n` +
+                  `*Monasterio Trapense*\n\n` +
                   `📝 *Nº Factura:* ${invoiceNumber}\n` +
                   `📅 *Fecha:* ${fechaFormateada}\n\n` +
                   `👤 *DATOS DEL CLIENTE:*\n` +
@@ -125,7 +125,7 @@ export class InvoiceGenerator {
     
     // Cabecera
     doc.fontSize(20).text('FACTURA DE COMPRA', { align: 'center' });
-    doc.fontSize(16).text('Monasterio de la Trapa', { align: 'center' });
+    doc.fontSize(16).text('Monasterio Trapense', { align: 'center' });
     doc.moveDown();
     
     // Información de la factura
