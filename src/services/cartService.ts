@@ -88,8 +88,8 @@ export class CartService implements ICartService {
     mensaje += `💰 *Total: $${totalFormateado}*\n\n`;
     
     mensaje += "Comandos disponibles:\n" +
-              "➕ *añadir [producto]* - Añadir producto (se preguntará la cantidad)\n" +
-              "➕ *añadir [cantidad] [producto]* - Añadir cantidad específica\n" +
+              "➕ *añadir [código]* - Ejemplo: añadir 1.2\n" +
+              "➕ *añadir [cantidad] [código]* - Ejemplo: añadir 3 1.2\n" +
               "➖ *quitar [número]* - Quitar un producto\n" +
               "✅ *finalizar compra* - Proceder al pago\n" +
               "❌ *vaciar carrito* - Cancelar la compra";

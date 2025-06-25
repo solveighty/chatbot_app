@@ -73,25 +73,21 @@ export class ResponseService implements IResponseService {
   public getHelpMessage(): string {
     return `📝 *¿Cómo hacer un pedido?*\n\n` +
            `Para hacer un pedido, sigue estos pasos:\n\n` +
-           `1️⃣ Escribe *ver productos* para ver el catálogo completo\n\n` +
-           `2️⃣ Identifica el producto exacto que deseas comprar\n\n` +
-           `3️⃣ Para productos normales:\n` +
-           `   ✅ Ejemplo: "quiero comprar Frasco de 500 ml"\n\n` +
-           `4️⃣ Para productos con colores o variantes:\n` +
-           `   ✅ Ejemplo: "quiero comprar De 12 cm Color blanco"\n` +
-           `   ✅ Ejemplo: "quiero comprar Fundas Ecológicas Color café"\n\n` +
-           `5️⃣ *Indica la cantidad de unidades* cuando se te pregunte\n\n` +
-           `6️⃣ Puedes añadir más productos a tu carrito repitiendo los pasos anteriores\n\n` +
-           `7️⃣ Cuando termines de agregar productos, escribe *carrito* para ver tu selección\n\n` +
-           `8️⃣ Escribe *finalizar compra* para proceder al pago\n\n` +
-           `9️⃣ Proporciona tus datos completos de contacto cuando se te soliciten:\n` +
-           `   • Nombre completo\n` +
-           `   • Dirección de entrega\n` +
-           `   • Número de teléfono\n\n` +
-           `🔟 Confirma tu pedido\n\n` +
+           `1️⃣ Escribe *ver productos* para ver el catálogo completo con códigos numéricos\n\n` +
+           `2️⃣ Identifica el código del producto que deseas comprar\n\n` +
+           `3️⃣ Selecciona un producto usando su código numérico:\n` +
+           `   ✅ Ejemplo: "1.2" (Categoría 1, Producto 2)\n` +
+           `   ✅ Ejemplo: "1.2.3" (Categoría 1, Producto 2, Variante 3)\n` +
+           `   ✅ También puedes escribir: "quiero comprar 1.2"\n\n` +
+           `4️⃣ *Indica la cantidad de unidades* cuando se te pregunte\n\n` +
+           `5️⃣ Puedes añadir más productos a tu carrito repitiendo los pasos anteriores\n\n` +
+           `6️⃣ Cuando termines, escribe *carrito* para ver tu selección\n\n` +
+           `7️⃣ Escribe *finalizar compra* para proceder al pago\n\n` +
+           `8️⃣ Proporciona tus datos completos de contacto cuando se te soliciten\n\n` +
+           `9️⃣ Confirma tu pedido\n\n` +
            `📌 *Comandos del carrito:*\n` +
-           `➕ *añadir [producto]* - Añadir producto (te preguntará la cantidad)\n` +
-           `➕ *añadir [cantidad] [producto]* - Añadir cantidad específica\n` +
+           `➕ *añadir [código]* - Añadir producto por su código\n` +
+           `➕ *añadir [cantidad] [código]* - Añadir cantidad específica\n` +
            `➖ *quitar [número]* - Elimina un producto por su número en el carrito\n` +
            `🛒 *carrito* - Ver tu carrito actual\n` +
            `❌ *vaciar carrito* - Elimina todos los productos\n` +

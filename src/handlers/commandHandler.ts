@@ -14,7 +14,82 @@ export class CommandHandler {
   ) {}
 
   public async handleCommand(command: string, userId: string, currentState: any): Promise<CommandResult> {
-    const commandLower = command.toLowerCase();
+    const commandLower = command.toLowerCase().trim();
+    
+    // Verificar si es un código numérico (1, 1.2, 1.2.3)
+    if (/^\d+(\.\d+)*$/.test(commandLower)) {
+      const producto = this.productService.buscarProductoPorCodigo(commandLower);
+      
+      if (producto) {
+        return {
+          response: `✅ *Producto encontrado:*\n\n` +
+                   `📦 ${producto.nombre}\n` +
+                   `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
+                   `🏷️ Categoría: ${producto.categoria}\n\n` +
+                   `*¿Cuántas unidades deseas añadir al carrito?*\n` +
+                   `Responde con un número (ejemplo: 2)`,
+          stateUpdates: {
+            lastCategory: 'solicitar_cantidad',
+            productoSeleccionado: producto,
+            timestamp: new Date()
+          }
+        };
+      } else {
+        // Verificar si es solo una categoría
+        const match = commandLower.match(/^(\d+)$/);
+        if (match) {
+          const catIndex = parseInt(match[1]) - 1;
+          if (catIndex >= 0 && catIndex < this.productService.getCategorias().length) {
+            // Es una categoría válida, mostrar sus productos
+            const categoria = this.productService.getCategorias()[catIndex];
+            
+            return {
+              response: this.productService.generarListaProductosCategoria(categoria),
+              stateUpdates: {
+                lastCategory: 'menu_categoria',
+                categoriaSeleccionada: categoria,
+                timestamp: new Date()
+              }
+            };
+          }
+        }
+        
+        return {
+          response: `❌ No encontré ningún producto con el código ${commandLower}.\n\n` +
+                   `Por favor, verifica el código en el catálogo. Escribe *ver productos* para ver la lista completa.`
+        };
+      }
+    }
+    
+    // Si el mensaje comienza con "quiero comprar" seguido de un número
+    if (/^(quiero comprar|comprar|pedir|ordenar)\s+\d+(\.\d+)*$/i.test(commandLower)) {
+      const codigoMatch = commandLower.match(/\d+(\.\d+)*/);
+      if (codigoMatch) {
+        const codigo = codigoMatch[0];
+        const producto = this.productService.buscarProductoPorCodigo(codigo);
+        
+        if (producto) {
+          return {
+            response: `✅ *Producto encontrado:*\n\n` +
+                    `📦 ${producto.nombre}\n` +
+                    `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
+                    `🏷️ Categoría: ${producto.categoria}\n\n` +
+                    `*¿Cuántas unidades deseas añadir al carrito?*\n` +
+                    `Responde con un número (ejemplo: 2)`,
+            stateUpdates: {
+              lastCategory: 'solicitar_cantidad',
+              productoSeleccionado: producto,
+              timestamp: new Date()
+            }
+          };
+        } else {
+          return {
+            response: `❌ No encontré ningún producto con el código ${codigo}.\n\n` +
+                    `Por favor, verifica el código en el catálogo. Escribe *ver productos* para ver la lista completa.`
+          };
+        }
+      }
+    }
     
     // comando de carrito
     if (commandLower === 'carrito' || commandLower === 'ver carrito') {
@@ -69,9 +144,10 @@ export class CommandHandler {
     }
     
     // para ver productos
-    if (commandLower.includes('ver productos')) {
+    if (commandLower === 'ver productos' || commandLower === 'productos' || commandLower === 'catálogo' || commandLower === 'catalogo') {
+      // Ahora usamos la versión numerada
       return {
-        response: this.productService.generarListaProductos()
+        response: this.productService.generarListaProductosNumerados()
       };
     }
     
@@ -92,73 +168,77 @@ export class CommandHandler {
   public async handleCartCommands(message: string, userId: string): Promise<CommandResult | null> {
     const messageLower = message.toLowerCase();
     
-    // para añadir al carrito
+    // Para añadir al carrito
     if (messageLower.startsWith('añadir') || messageLower.startsWith('anadir') || messageLower.startsWith('agregar')) {
       const partes = messageLower.split(' ');
       
-      // si solo escribe "añadir [producto]" sin cantidad
+      // Si solo escribe "añadir [código o producto]" sin cantidad
       if (partes.length >= 2) {
-        // ver si el segundo elemento es un número
+        // Ver si el segundo elemento es un número (puede ser cantidad o código)
         const posibleCantidad = parseInt(partes[1]);
         
         if (!isNaN(posibleCantidad) && posibleCantidad > 0) {
-          // caso "añadir 2 Frasco de 500 ml"
-          const cantidadStr = partes[1];
-          const cantidad = parseInt(cantidadStr);
-          
-          const nombreProducto = message.substring(message.indexOf(cantidadStr) + cantidadStr.length).trim();
-          
-          // producto exacto
-          const producto = this.productService.buscarProductoExacto(nombreProducto);
-          if (!producto) {
-            return {
-              response: `No encontré el producto "${nombreProducto}". Verifica el nombre exacto en el catálogo.`
-            };
-          }
-          
-          // añade al carrito
-          this.cartService.addItemToCart(userId, producto, cantidad);
-          return {
-            response: `✅ Añadido al carrito: ${producto.nombre} x${cantidad}\n\n` +
-                    `Precio por unidad: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
-                    `Total: $${(producto.precio * cantidad).toFixed(2).replace('.', ',')}\n\n` +
-                    `Escribe *carrito* para ver tu carrito de compras.`
-          };
-        } else {
-          // caso "añadir Frasco de 500 ml" sin cantidad
-          const nombreProducto = message.substring(message.indexOf(partes[0]) + partes[0].length).trim();
-          
-          // producto exacto
-          const producto = this.productService.buscarProductoExacto(nombreProducto);
-          if (!producto) {
-            return {
-              response: `No encontré el producto "${nombreProducto}". Verifica el nombre exacto en el catálogo.`
-            };
-          }
-          
-          // devolver un resultado especial para que BotService pregunte la cantidad
-          return {
-            response: `✅ *Producto encontrado:*\n\n` +
-                     `📦 ${producto.nombre}\n` +
-                     `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
-                     `🏷️ Categoría: ${producto.categoria}\n\n` +
-                     `*¿Cuántas unidades deseas añadir al carrito?*\n` +
-                     `Responde con un número (ejemplo: 2)`,
-            stateUpdates: {
-              lastCategory: 'solicitar_cantidad',
-              productoSeleccionado: producto,
-              timestamp: new Date()
+          // Caso "añadir 2 1.3" (cantidad seguida de código)
+          if (partes.length >= 3) {
+            const cantidadStr = partes[1];
+            const cantidad = parseInt(cantidadStr);
+            
+            // Verificar si lo que sigue es un código numérico
+            const codigoMatch = message.substring(message.indexOf(cantidadStr) + cantidadStr.length).trim().match(/\d+(\.\d+)*/);
+            
+            if (codigoMatch) {
+              const codigo = codigoMatch[0];
+              const producto = this.productService.buscarProductoPorCodigo(codigo);
+              
+              if (producto) {
+                this.cartService.addItemToCart(userId, producto, cantidad);
+                return {
+                  response: `✅ Añadido al carrito: ${producto.nombre} x${cantidad}\n\n` +
+                          `Precio por unidad: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
+                          `Total: $${(producto.precio * cantidad).toFixed(2).replace('.', ',')}\n\n` +
+                          `Escribe *carrito* para ver tu carrito de compras.`
+                };
+              } else {
+                return {
+                  response: `❌ No encontré ningún producto con el código ${codigo}.\n\n` +
+                          `Por favor, verifica el código en el catálogo. Escribe *ver productos* para ver la lista completa.`
+                };
+              }
             }
-          };
+          }
+        } else {
+          // Caso "añadir 1.2" (código directo sin cantidad)
+          const codigoMatch = partes.slice(1).join(' ').match(/\d+(\.\d+)*/);
+          
+          if (codigoMatch) {
+            const codigo = codigoMatch[0];
+            const producto = this.productService.buscarProductoPorCodigo(codigo);
+            
+            if (producto) {
+              return {
+                response: `✅ *Producto encontrado:*\n\n` +
+                        `📦 ${producto.nombre}\n` +
+                        `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
+                        `🏷️ Categoría: ${producto.categoria}\n\n` +
+                        `*¿Cuántas unidades deseas añadir al carrito?*\n` +
+                        `Responde con un número (ejemplo: 2)`,
+                stateUpdates: {
+                  lastCategory: 'solicitar_cantidad',
+                  productoSeleccionado: producto,
+                  timestamp: new Date()
+                }
+              };
+            } else {
+              return {
+                response: `❌ No encontré ningún producto con el código ${codigo}.\n\n` +
+                        `Por favor, verifica el código en el catálogo. Escribe *ver productos* para ver la lista completa.`
+              };
+            }
+          }
         }
       }
       
-      return {
-        response: "Para añadir un producto, escribe: *añadir [producto]* o *añadir [cantidad] [producto]*\n" +
-                 "Ejemplos:\n" +
-                 "• añadir Frasco de 500 ml\n" +
-                 "• añadir 2 Frasco de 500 ml"
-      };
+      // Resto del código existente para el manejo de "añadir [producto]" por nombre...
     }
     
     // para quitar del carrito

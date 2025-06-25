@@ -169,6 +169,26 @@ export class BotService {
         return resultado.texto;
       }
       
+      // Procesar entrada numérica como selección de producto cuando estamos en una categoría
+      if (/^\d+(\.\d+)*$/.test(userMessageLower) && state?.lastCategory === 'menu_categoria') {
+        const producto = this.productService.buscarProductoPorCodigo(userMessageLower);
+        
+        if (producto) {
+          this.stateManager.updateState(userId, {
+            lastCategory: 'solicitar_cantidad',
+            productoSeleccionado: producto,
+            timestamp: new Date()
+          });
+          
+          return `✅ *Producto encontrado:*\n\n` +
+                 `📦 ${producto.nombre}\n` +
+                 `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
+                 `🏷️ Categoría: ${producto.categoria}\n\n` +
+                 `*¿Cuántas unidades deseas añadir al carrito?*\n` +
+                 `Responde con un número (ejemplo: 2)`;
+        }
+      }
+      
       // última opción: respuesta genérica según categoría detectada
       const category = this.responseService.determineCategory(userMessage);
       

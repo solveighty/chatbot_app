@@ -21,4 +21,9 @@ export class ConversationStateManager implements IConversationStateManager {
   public getState(userId: string): any {
     return this.conversationState.get(userId);
   }
+
+  public clearState(userId: string): void {
+    this.conversationState.delete(userId);
+    logger.debug(`Estado eliminado para usuario ${userId}`);
+  }
 }

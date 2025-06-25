@@ -499,4 +499,149 @@ export class ProductService implements IProductService {
       return undefined;
     }
   }
+
+  /**
+   * Genera un texto con todos los productos disponibles, numerados por categoría y subcategoría
+   */
+  public generarListaProductosNumerados(): string {
+    let mensaje = "📦 *Productos disponibles:*\n\n";
+    
+    this.productos.forEach((categoria, catIndex) => {
+      const catNumber = catIndex + 1;
+      const emoji = this.getEmojiForCategory(categoria.categoria);
+      mensaje += `${emoji} *${catNumber}. ${categoria.categoria}*\n`;
+
+      categoria.productos.forEach((producto, prodIndex) => {
+        const prodNumber = `${catNumber}.${prodIndex + 1}`;
+        const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
+        
+        if (producto.variantes && producto.variantes.length > 0) {
+          mensaje += `- ${prodNumber} ${producto.nombre}: $${precioFormateado}\n`;
+          
+          // se muestra cada variante con su precio
+          producto.variantes.forEach((variante, varIndex) => {
+            const varNumber = `${prodNumber}.${varIndex + 1}`;
+            const precioVarianteFormateado = variante.precio.toFixed(2).replace(".", ",");
+            mensaje += `  • ${varNumber} ${variante.nombre}: $${precioVarianteFormateado}\n`;
+          });
+          
+          // ejemplo de cómo ordenar con números
+          mensaje += `  → Para ordenar, escribe: *${catNumber}* o *${prodNumber}* o *${prodNumber}.1*\n`;
+        } else {
+          mensaje += `- ${prodNumber} ${producto.nombre}: $${precioFormateado}\n`;
+        }
+      });
+      mensaje += "\n";
+    });
+
+    mensaje += "📷 Para ver imágenes, escribe: *ver imágenes*\n\n";
+    mensaje += "🛒 *¿Cómo hacer un pedido?*\n";
+    mensaje += "1. Escribe el número de la categoría, producto o variante.\n";
+    mensaje += "   Ejemplos: *1* (categoría), *1.2* (producto), *1.2.3* (variante)\n";
+    mensaje += "2. También puedes escribir *quiero comprar* seguido del número.\n";
+    mensaje += "3. Indica la cantidad de unidades que deseas cuando se te pregunte.\n";
+    mensaje += "4. Puedes agregar varios productos a tu carrito.\n";
+    mensaje += "5. Escribe *carrito* para ver tus productos seleccionados.\n";
+    mensaje += "6. Escribe *finalizar compra* cuando estés listo.\n\n";
+    mensaje += "Para más ayuda, escribe: *ayuda*";
+
+    return mensaje;
+  }
+
+  /**
+   * Busca producto por su código numérico (formato: categoria.producto.variante)
+   */
+  public buscarProductoPorCodigo(codigo: string): {
+    nombre: string;
+    precio: number;
+    categoria: string;
+  } | null {
+    // Dividir el código en partes (categoría, producto, variante)
+    const partes = codigo.split('.').map(num => parseInt(num) - 1);
+    
+    // Si no hay partes o la primera parte no es un número válido, retornar null
+    if (partes.length === 0 || isNaN(partes[0]) || partes[0] < 0 || partes[0] >= this.productos.length) {
+      return null;
+    }
+
+    const categoria = this.productos[partes[0]];
+    
+    // Si solo tenemos la categoría, no podemos devolver un producto específico
+    if (partes.length === 1) {
+      return null;
+    }
+    
+    // Verificar si el índice del producto es válido
+    if (isNaN(partes[1]) || partes[1] < 0 || partes[1] >= categoria.productos.length) {
+      return null;
+    }
+    
+    const producto = categoria.productos[partes[1]];
+    
+    // Si hay una tercera parte, es una variante
+    if (partes.length > 2 && producto.variantes) {
+      // Verificar si el índice de la variante es válido
+      if (isNaN(partes[2]) || partes[2] < 0 || partes[2] >= producto.variantes.length) {
+        return null;
+      }
+      
+      const variante = producto.variantes[partes[2]];
+      
+      return {
+        nombre: `${producto.nombre} - ${variante.nombre}`,
+        precio: variante.precio,
+        categoria: categoria.categoria
+      };
+    }
+    
+    // Si solo tenemos categoría y producto, o el producto no tiene variantes
+    return {
+      nombre: producto.nombre,
+      precio: producto.precio,
+      categoria: categoria.categoria
+    };
+  }
+
+  /**
+   * Genera una lista de productos de una categoría específica con numeración
+   */
+  public generarListaProductosCategoria(nombreCategoria: string): string {
+    const categoriaIndex = this.productos.findIndex(cat => 
+      cat.categoria.toLowerCase() === nombreCategoria.toLowerCase()
+    );
+    
+    if (categoriaIndex === -1) {
+      return `No encontré la categoría "${nombreCategoria}". Escribe *ver productos* para ver todas las categorías.`;
+    }
+    
+    const categoria = this.productos[categoriaIndex];
+    const catNumber = categoriaIndex + 1;
+    const emoji = this.getEmojiForCategory(categoria.categoria);
+    
+    let mensaje = `${emoji} *Productos de ${categoria.categoria} (${catNumber}):*\n\n`;
+    
+    categoria.productos.forEach((producto, prodIndex) => {
+      const prodNumber = `${catNumber}.${prodIndex + 1}`;
+      const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
+      
+      if (producto.variantes && producto.variantes.length > 0) {
+        mensaje += `- ${prodNumber} ${producto.nombre}: $${precioFormateado}\n`;
+        
+        // Mostrar variantes
+        producto.variantes.forEach((variante, varIndex) => {
+          const varNumber = `${prodNumber}.${varIndex + 1}`;
+          const precioVarianteFormateado = variante.precio.toFixed(2).replace(".", ",");
+          mensaje += `  • ${varNumber} ${variante.nombre}: $${precioVarianteFormateado}\n`;
+        });
+      } else {
+        mensaje += `- ${prodNumber} ${producto.nombre}: $${precioFormateado}\n`;
+      }
+    });
+    
+    mensaje += "\n💬 Para seleccionar un producto, escribe su código numérico (ejemplo: *1.2*)";
+    mensaje += "\n💬 También puedes escribir: *quiero comprar 1.2*";
+    mensaje += "\n🔙 Para ver todas las categorías escribe: *ver productos*";
+    
+    return mensaje;
+  }
 }

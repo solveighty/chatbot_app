@@ -1,4 +1,4 @@
-import { Message, MessageMedia } from 'whatsapp-web.js';
+import { MessageMedia } from 'whatsapp-web.js';
 import { CartItem } from '../services/cartService';
 
 export interface PedidoResult {
@@ -25,18 +25,22 @@ export interface IProductService {
   buscarProductoEnCategoria(nombreCategoria: string, nombreProducto: string): any | null;
   obtenerIndiceCategoria(seleccion: string): number;
   obtenerImagenProducto(producto: any): Promise<MessageMedia | undefined>;
+  buscarProductoPorCodigo(codigo: string): { nombre: string; precio: number; categoria: string } | null;
+  generarListaProductosCategoria(nombreCategoria: string): string;
+  generarListaProductosNumerados(): string;
 }
 
 export interface ICartService {
-  addItemToCart(userId: string, producto: { nombre: string; precio: number; categoria: string }, cantidad?: number): CartItem[];
   getCart(userId: string): CartItem[];
-  getCartTotal(userId: string): number;
-  generateCartSummary(userId: string): string;
+  addItemToCart(userId: string, producto: { nombre: string; precio: number; categoria: string }, cantidad?: number): CartItem[];
   removeItemFromCart(userId: string, index: number): boolean;
   clearCart(userId: string): void;
+  getCartTotal(userId: string): number;
+  generateCartSummary(userId: string): string;
 }
 
 export interface IConversationStateManager {
-  updateState(userId: string, state: any): void;
   getState(userId: string): any;
+  updateState(userId: string, updates: any): void;
+  clearState(userId: string): void;
 }
