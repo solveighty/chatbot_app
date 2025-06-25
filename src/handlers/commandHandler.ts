@@ -153,9 +153,39 @@ export class CommandHandler {
     
     // para ver imágenes
     if (commandLower.includes('ver imágenes') || commandLower.includes('ver imagenes')) {
+      // Extraer código numérico si existe (ver imágenes 1 o ver imágenes 1.2)
+      const codigoMatch = commandLower.match(/\d+(\.\d+)*/);
+      
+      if (codigoMatch) {
+        const codigo = codigoMatch[0];
+        // Procesar la solicitud de imagen con el código específico
+        const resultado = await this.productService.procesarSolicitudImagen(codigo);
+        
+        if (resultado.imagen) {
+          return {
+            response: { text: resultado.texto, media: resultado.imagen },
+            stateUpdates: { 
+              lastCategory: resultado.esCategoria ? 'menu_imagenes_categoria' : 'imagen_producto',
+              codigoVisto: codigo,
+              timestamp: new Date() 
+            }
+          };
+        } else {
+          return {
+            response: resultado.texto,
+            stateUpdates: { 
+              lastCategory: resultado.esCategoria ? 'menu_imagenes_categoria' : 'imagen_producto',
+              codigoVisto: codigo,
+              timestamp: new Date() 
+            }
+          };
+        }
+      }
+      
+      // Si no hay código específico, mostrar el menú principal de imágenes
       return {
-        response: this.productService.generarMenuCategorias(),
-        stateUpdates: { lastCategory: 'menu_categorias', timestamp: new Date() }
+        response: this.productService.generarMenuImagenesNumerado(),
+        stateUpdates: { lastCategory: 'menu_imagenes', timestamp: new Date() }
       };
     }
 

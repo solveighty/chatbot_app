@@ -28,6 +28,12 @@ export interface IProductService {
   buscarProductoPorCodigo(codigo: string): { nombre: string; precio: number; categoria: string } | null;
   generarListaProductosCategoria(nombreCategoria: string): string;
   generarListaProductosNumerados(): string;
+  procesarSolicitudImagen(codigo: string): Promise<{
+    texto: string;
+    imagen?: MessageMedia;
+    esCategoria: boolean;
+  }>;
+  generarMenuImagenesNumerado(): string;
 }
 
 export interface ICartService {

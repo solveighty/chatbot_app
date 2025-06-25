@@ -189,6 +189,28 @@ export class BotService {
         }
       }
       
+      // Manejar entradas numéricas como códigos para ver imágenes cuando estamos en un menú de imágenes
+      if (/^\d+(\.\d+)*$/.test(userMessageLower) && 
+          (state?.lastCategory === 'menu_imagenes' || state?.lastCategory === 'menu_imagenes_categoria')) {
+        
+        const resultado = await this.productService.procesarSolicitudImagen(userMessageLower);
+        
+        this.stateManager.updateState(userId, {
+          lastCategory: resultado.esCategoria ? 'menu_imagenes_categoria' : 'imagen_producto',
+          codigoVisto: userMessageLower,
+          timestamp: new Date()
+        });
+        
+        if (resultado.imagen) {
+          return {
+            text: resultado.texto,
+            media: resultado.imagen
+          };
+        }
+        
+        return resultado.texto;
+      }
+      
       // última opción: respuesta genérica según categoría detectada
       const category = this.responseService.determineCategory(userMessage);
       
