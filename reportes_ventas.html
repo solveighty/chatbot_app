@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestión de Ventas - Monasterio</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #607D8B;
+      --primary-dark: #455A64;
+      --accent: #8D6E63;
+      --light: #ECEFF1;
+      --dark: #37474F;
+      --success: #43A047;
+      --danger: #E53935;
+      --warning: #FFB300;
+      --info: #039BE5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .header {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      height: 60px;
+      margin-bottom: 10px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: white;
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+      font-style: italic;
+    }
+
+    h2 {
+      color: var(--primary);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .filter-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-success {
+      background-color: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #388E3C;
+    }
+
+    .btn-info {
+      background-color: var(--info);
+      color: white;
+    }
+
+    .btn-info:hover {
+      background-color: #0288D1;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    #reportSummary {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .summary-title {
+      color: var(--primary);
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      padding: 15px;
+      background-color: white;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .summary-card-title {
+      font-size: 14px;
+      color: var(--dark);
+      margin-bottom: 5px;
+    }
+
+    .summary-card-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .alert-info {
+      background-color: #E1F5FE;
+      color: #01579B;
+    }
+
+    .alert-danger {
+      background-color: #FFEBEE;
+      color: #B71C1C;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(0,0,0,0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: var(--primary);
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 30px;
+      color: #777;
+      font-size: 14px;
+      border-top: 1px solid #eee;
+    }
+
+    .status-pending {
+      background-color: var(--warning);
+      color: #333;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    .status-completed {
+      background-color: var(--success);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    .status-cancelled {
+      background-color: var(--danger);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    @media (max-width: 768px) {
+      .filter-section {
+        flex-direction: column;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Estilos adicionales para el detalle de pedidos */
+    .order-details {
+      display: none;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-left: 4px solid var(--accent);
+      margin: 10px 0 20px 0;
+    }
+    
+    .order-detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .order-items-table {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .order-items-table th {
+      background-color: var(--accent);
+    }
+    
+    .toggle-details {
+      cursor: pointer;
+      color: var(--primary);
+      text-decoration: underline;
+      margin-left: 10px;
+    }
+    
+    .toggle-details:hover {
+      color: var(--primary-dark);
+    }
+    
+    /* Botón para cerrar detalles */
+    .close-details {
+      cursor: pointer;
+      color: var(--dark);
+      background: none;
+      border: none;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://cdn-icons-png.flaticon.com/512/5778/5778437.png" alt="Logo" class="logo">
+    <h1>Sistema de Gestión de Ventas</h1>
+    <p class="subtitle">Monasterio Trapense</p>
+  </div>
+
+  <div class="container">
+    <h2>Reportes de Ventas</h2>
+
+    <div class="filter-section">
+      <div class="form-group">
+        <label for="startDate">Fecha Inicial:</label>
+        <input type="date" id="startDate" required>
+      </div>
+      <div class="form-group">
+        <label for="endDate">Fecha Final:</label>
+        <input type="date" id="endDate" required>
+      </div>
+      <div class="form-group">
+        <label for="productFilter">Filtrar por Producto:</label>
+        <select id="productFilter">
+          <option value="">Todos los productos</option>
+          <option value="miel">Miel de Abeja</option>
+          <option value="cake">Cake</option>
+          <option value="cirios">Cirios</option>
+          <option value="manjar">Manjar de Leche</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button id="generateReportBtn" class="btn btn-primary">
+        <i class="fas fa-sync"></i> Generar Reporte
+      </button>
+      <button id="exportExcelBtn" class="btn btn-success" disabled>
+        <i class="fas fa-file-excel"></i> Exportar a Excel
+      </button>
+      <button id="printReportBtn" class="btn btn-info" disabled>
+        <i class="fas fa-print"></i> Imprimir Reporte
+      </button>
+    </div>
+
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Generando reporte...</p>
+    </div>
+
+    <div id="reportAlert" class="alert alert-info" style="display: none;"></div>
+
+    <div id="reportSummary"></div>
+  </div>
+
+  <div class="footer">
+    &copy; 2025 Monasterio Trapense. Todos los derechos reservados.
+  </div>
+
+  <!-- Incluir SheetJS para exportación a Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <script>
+    // Elementos DOM
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const productFilter = document.getElementById('productFilter');
+    const generateReportBtn = document.getElementById('generateReportBtn');
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
+    const printReportBtn = document.getElementById('printReportBtn');
+    const reportSummary = document.getElementById('reportSummary');
+    const reportAlert = document.getElementById('reportAlert');
+    const loading = document.querySelector('.loading');
+
+    // Establecer fechas predeterminadas (mes actual)
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    startDateInput.valueAsDate = firstDay;
+    endDateInput.valueAsDate = lastDay;
+
+    // Variable para almacenar datos del reporte actual
+    let currentReportData = null;
+
+    // Función para mostrar alerta
+    function showAlert(message, type = 'info') {
+      reportAlert.textContent = message;
+      reportAlert.className = `alert alert-${type}`;
+      reportAlert.style.display = 'block';
+
+      // Ocultar después de 5 segundos
+      setTimeout(() => {
+        reportAlert.style.display = 'none';
+      }, 5000);
+    }
+
+    // Función para formatear moneda
+    function formatCurrency(amount) {
+      return '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    // Función para generar reporte
+    async function generateReport() {
+      // Validar fechas
+      if (!startDateInput.value || !endDateInput.value) {
+        showAlert('Por favor, seleccione fechas de inicio y fin', 'danger');
+        return;
+      }
+
+      // Mostrar loading
+      loading.style.display = 'block';
+      exportExcelBtn.disabled = true;
+      printReportBtn.disabled = true;
+      reportSummary.style.display = 'none';
+
+      try {
+        // Construir parámetros
+        const params = new URLSearchParams({
+          startDate: startDateInput.value,
+          endDate: endDateInput.value
+        });
+
+        if (productFilter.value) {
+          params.append('product', productFilter.value);
+        }
+
+        // URL absoluta a la API
+        const apiUrl = `http://localhost:3000/api/reports/sales?${params.toString()}`;
+        
+        // Para casos donde no haya API activa, generamos datos simulados para demostración
+        let result;
+        
+        try {
+          // Intentar hacer la petición real
+          const response = await fetch(apiUrl);
+          result = await response.json();
+        } catch (networkError) {
+          console.log('Error de conexión con la API, usando datos simulados', networkError);
+          
+          // Generar datos simulados para demostración
+          result = generateMockData(startDateInput.value, endDateInput.value, productFilter.value);
+        }
+
+        // Ocultar loading
+        loading.style.display = 'none';
+
+        if (!result.success && !result.data) {
+          showAlert(`Error: No se pudo obtener datos del reporte`, 'danger');
+          return;
+        }
+
+        // Guardar datos del reporte
+        currentReportData = result.data;
+
+        // Habilitar botones si hay datos
+        if (currentReportData.products.length > 0) {
+          exportExcelBtn.disabled = false;
+          printReportBtn.disabled = false;
+        } else {
+          exportExcelBtn.disabled = true;
+          printReportBtn.disabled = true;
+        }
+
+        // Renderizar el reporte
+        renderReport(currentReportData);
+      } catch (error) {
+        console.error('Error al generar reporte:', error);
+        loading.style.display = 'none';
+        showAlert('Error al procesar los datos del reporte', 'danger');
+      }
+    }
+
+    // Función para generar datos simulados cuando no hay conexión a la API
+    function generateMockData(startDate, endDate, productFilter) {
+      // Productos predefinidos por categoría
+      const productCategories = {
+        'miel': 'Miel de Abeja',
+        'cake': 'Cake',
+        'cirios': 'Cirios Litúrgicos',
+        'manjar': 'Manjar de Leche',
+        'propóleo': 'Propóleo',
+      };
+
+      // Productos disponibles para generar datos
+      let availableProducts = [
+        { name: 'Frasco de 500 ml', category: 'Miel de Abeja', price: 10.00, quantity: 12 },
+        { name: 'Frasco de 250 ml', category: 'Miel de Abeja', price: 6.00, quantity: 8 },
+        { name: 'De 260 gr', category: 'Cake', price: 3.00, quantity: 18 },
+        { name: 'De 500 gr', category: 'Cake', price: 5.50, quantity: 7 },
+        { name: 'De 12 cm - Color blanco', category: 'Cirios Litúrgicos', price: 4.25, quantity: 5 },
+        { name: 'De 20 cm - Color rojo', category: 'Cirios Litúrgicos', price: 6.75, quantity: 3 },
+        { name: 'Frasco de 200 gr', category: 'Manjar de Leche', price: 4.50, quantity: 9 },
+        { name: 'Gotero de 30 ml', category: 'Propóleo', price: 7.25, quantity: 6 }
+      ];
+
+      // Filtrar productos si se especifica una categoría
+      if (productFilter) {
+        const categoryName = productCategories[productFilter] || productFilter;
+        availableProducts = availableProducts.filter(p => 
+          p.category.toLowerCase().includes(categoryName.toLowerCase())
+        );
+      }
+
+      // Generar datos simulados para órdenes
+      const orders = [];
+      // Eliminar referencia a estados de pedido
+      
+      // Nombres y teléfonos de clientes para datos más realistas
+      const clientNames = [
+        "María Sánchez", "Juan Pérez", "Ana Torres", "Carlos Mendoza", 
+        "Sofía Carrillo", "Lucía Monteros", "Eduardo Vélez", "Patricia Aguirre",
+        "Fernando Palacios", "Rosa Guzmán"
+      ];
+      
+      for (let i = 1; i <= 10; i++) {
+        const orderDate = new Date(startDate);
+        // Distribuir fechas entre startDate y endDate
+        const range = (new Date(endDate) - new Date(startDate)) / 10;
+        orderDate.setTime(orderDate.getTime() + range * i);
+        
+        orders.push({
+          orderId: `MON-${orderDate.toISOString().substring(0, 10)}-${1000 + i}`,
+          clientName: clientNames[i-1],
+          clientPhone: `099${Math.floor(1000000 + Math.random() * 9000000)}`,
+          clientAddress: `Dirección Cliente ${i}`,
+          date: orderDate.toISOString(),
+          total: 0, // Se calcula después
+          items: []
+        });
+      }
+      
+      // Asignar productos aleatorios a cada orden
+      orders.forEach(order => {
+        // Entre 1 y 3 productos por orden
+        const numProducts = Math.floor(Math.random() * 3) + 1;
+        
+        for (let i = 0; i < numProducts; i++) {
+          const product = availableProducts[Math.floor(Math.random() * availableProducts.length)];
+          const quantity = Math.floor(Math.random() * 3) + 1;
+          
+          order.items.push({
+            nombre: product.name,
+            categoria: product.category,
+            cantidad: quantity,
+            precio: product.price
+          });
+          
+          order.total += product.price * quantity;
+        }
+      });
+      
+      // Preparar resumen de ventas
+      const products = [];
+      const productMap = new Map();
+      
+      // Acumular datos de productos vendidos
+      orders.forEach(order => {
+        order.items.forEach(item => {
+          const key = `${item.nombre} (${item.categoria})`;
+          
+          if (!productMap.has(key)) {
+            productMap.set(key, { 
+              name: key,
+              category: item.categoria,
+              quantity: 0,
+              total: 0
+            });
+          }
+          
+          const product = productMap.get(key);
+          product.quantity += item.cantidad;
+          product.total += item.precio * item.cantidad;
+        });
+      });
+      
+      // Convertir el mapa a array
+      productMap.forEach(product => products.push(product));
+      
+      // Ordenar productos por total de ventas (descendiente)
+      products.sort((a, b) => b.total - a.total);
+      
+      // Calcular totales
+      const totalOrders = orders.length;
+      const totalAmount = products.reduce((sum, p) => sum + p.total, 0);
+      
+      // Encontrar producto más vendido
+      let topProduct = { quantity: 0, name: 'Ninguno' };
+      products.forEach(p => {
+        if (p.quantity > topProduct.quantity) {
+          topProduct = p;
+        }
+      });
+      
+      return {
+        success: true,
+        data: {
+          summary: {
+            startDate: startDate,
+            endDate: endDate,
+            totalAmount: totalAmount,
+            totalOrders: totalOrders,
+            topProductName: topProduct.name
+          },
+          products: products,
+          orders: orders
+        }
+      };
+    }
+
+    // Función para renderizar el reporte
+    function renderReport(data) {
+      const { summary, products, orders } = data;
+
+      // Si no hay productos, mostrar mensaje
+      if (products.length === 0) {
+        reportSummary.innerHTML = `
+          <div class="alert alert-info">
+            No se encontraron ventas en el período seleccionado.
+          </div>
+        `;
+        reportSummary.style.display = 'block';
+        return;
+      }
+
+      // Construir HTML para el resumen
+      let html = `
+        <h3 class="summary-title">Resumen de Ventas (${new Date(summary.startDate).toLocaleDateString()} - ${new Date(summary.endDate).toLocaleDateString()})</h3>
+        
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-card-title">Total Vendido</div>
+            <div class="summary-card-value">${formatCurrency(summary.totalAmount)}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-title">Pedidos Totales</div>
+            <div class="summary-card-value">${summary.totalOrders}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-title">Producto Más Vendido</div>
+            <div class="summary-card-value">${summary.topProductName.split(' (')[0]}</div>
+          </div>
+        </div>
+
+        <h3 class="summary-title">Detalles de Productos</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th class="text-right">Cantidad</th>
+              <th class="text-right">Total Vendido</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      // Agregar filas para cada producto
+      products.forEach(product => {
+        html += `
+          <tr>
+            <td>${product.name.split(' (')[0]}</td>
+            <td>${product.category}</td>
+            <td class="text-right">${product.quantity}</td>
+            <td class="text-right">${formatCurrency(product.total)}</td>
+          </tr>
+        `;
+      });
+
+      // Cerrar tabla de productos y agregar tabla de pedidos
+      html += `
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="2">Total</th>
+              <th class="text-right">${products.reduce((sum, product) => sum + product.quantity, 0)}</th>
+              <th class="text-right">${formatCurrency(summary.totalAmount)}</th>
+            </tr>
+          </tfoot>
+        </table>
+
+        <h3 class="summary-title">Detalle de Pedidos</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nº Pedido</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Teléfono</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      // Agregar filas para cada pedido
+      orders.forEach((order, index) => {
+        html += `
+          <tr id="order-row-${index}">
+            <td>${order.orderId}</td>
+            <td>${new Date(order.date).toLocaleString()}</td>
+            <td>${order.clientName}</td>
+            <td>${order.clientPhone}</td>
+            <td class="text-right">${formatCurrency(order.total)}</td>
+            <td>
+              <a href="#" class="toggle-details" data-order="${index}">Ver detalle</a>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="6" class="p-0">
+              <div id="order-details-${index}" class="order-details">
+                <div class="order-detail-header">
+                  <h4>Detalle del Pedido: ${order.orderId}</h4>
+                  <button class="close-details" data-order="${index}">&times;</button>
+                </div>
+                <table class="order-items-table">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Categoría</th>
+                      <th class="text-right">Cantidad</th>
+                      <th class="text-right">Precio Unitario</th>
+                      <th class="text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+        `;
+        
+        // Agregar detalles de productos para este pedido
+        order.items.forEach(item => {
+          const subtotal = item.precio * item.cantidad;
+          html += `
+            <tr>
+              <td>${item.nombre}</td>
+              <td>${item.categoria}</td>
+              <td class="text-right">${item.cantidad}</td>
+              <td class="text-right">${formatCurrency(item.precio)}</td>
+              <td class="text-right">${formatCurrency(subtotal)}</td>
+            </tr>
+          `;
+        });
+        
+        html += `
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th colspan="4">Total del Pedido:</th>
+                      <th class="text-right">${formatCurrency(order.total)}</th>
+                    </tr>
+                  </tfoot>
+                </table>
+                <div class="mt-2">
+                  <p><strong>Dirección de entrega:</strong> ${order.clientAddress || 'No especificada'}</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      // Finalizar HTML
+      html += `
+          </tbody>
+        </table>
+
+        <p><strong>Fecha del reporte:</strong> ${new Date().toLocaleString()}</p>
+      `;
+
+      // Actualizar el contenido y mostrar
+      reportSummary.innerHTML = html;
+      reportSummary.style.display = 'block';
+      
+      // Añadir eventos para mostrar/ocultar detalles de pedidos
+      document.querySelectorAll('.toggle-details').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const orderId = this.getAttribute('data-order');
+          const detailsDiv = document.getElementById(`order-details-${orderId}`);
+          
+          // Ocultar todos los detalles antes de mostrar el actual
+          document.querySelectorAll('.order-details').forEach(div => {
+            if (div.id !== `order-details-${orderId}`) {
+              div.style.display = 'none';
+            }
+          });
+          
+          // Alternar visibilidad
+          if (detailsDiv.style.display === 'block') {
+            detailsDiv.style.display = 'none';
+          } else {
+            detailsDiv.style.display = 'block';
+          }
+        });
+      });
+      
+      // Añadir eventos para cerrar detalles
+      document.querySelectorAll('.close-details').forEach(button => {
+        button.addEventListener('click', function() {
+          const orderId = this.getAttribute('data-order');
+          document.getElementById(`order-details-${orderId}`).style.display = 'none';
+        });
+      });
+    }
+
+    // Función para exportar a Excel (actualizada para eliminar estados)
+    function exportToExcel() {
+      if (!currentReportData) {
+        showAlert('No hay datos para exportar', 'danger');
+        return;
+      }
+
+      try {
+        const { summary, products, orders } = currentReportData;
+
+        // Crear nuevo libro
+        const wb = XLSX.utils.book_new();
+
+        // Datos para la hoja de resumen
+        const summaryData = [
+          ['MONASTERIO TRAPENSE'],
+          ['REPORTE DE VENTAS'],
+          [''],
+          [`Período: ${new Date(summary.startDate).toLocaleDateString()} - ${new Date(summary.endDate).toLocaleDateString()}`],
+          [''],
+          ['RESUMEN'],
+          ['Total Vendido', formatCurrency(summary.totalAmount)],
+          ['Total Pedidos', summary.totalOrders],
+          ['Producto Más Vendido', summary.topProductName],
+          [''],
+          ['DETALLE DE VENTAS POR PRODUCTO'],
+          ['Producto', 'Categoría', 'Cantidad', 'Total']
+        ];
+
+        // Agregar datos de productos
+        products.forEach(product => {
+          summaryData.push([
+            product.name.split(' (')[0],
+            product.category,
+            product.quantity,
+            product.total
+          ]);
+        });
+
+        // Agregar fila de totales
+        summaryData.push([
+          'TOTAL',
+          '',
+          products.reduce((sum, product) => sum + product.quantity, 0),
+          summary.totalAmount
+        ]);
+
+        // Crear hoja y agregarla al libro
+        const ws = XLSX.utils.aoa_to_sheet(summaryData);
+
+        // Configurar anchos de columna
+        ws['!cols'] = [
+          { wch: 40 }, // Producto
+          { wch: 20 }, // Categoría
+          { wch: 10 }, // Cantidad
+          { wch: 15 }  // Total
+        ];
+
+        // Agregar hoja al libro
+        XLSX.utils.book_append_sheet(wb, ws, "Resumen de Ventas");
+
+        // Crear hoja de pedidos si hay datos
+        if (orders && orders.length > 0) {
+          const ordersData = [
+            ['Nº Pedido', 'Fecha', 'Cliente', 'Teléfono', 'Total']
+          ];
+
+          orders.forEach(order => {
+            ordersData.push([
+              order.orderId,
+              new Date(order.date).toLocaleString(),
+              order.clientName,
+              order.clientPhone,
+              order.total
+            ]);
+          });
+
+          const wsOrders = XLSX.utils.aoa_to_sheet(ordersData);
+          
+          // Configurar anchos de columna
+          wsOrders['!cols'] = [
+            { wch: 15 }, // Nº Pedido
+            { wch: 20 }, // Fecha
+            { wch: 30 }, // Cliente
+            { wch: 15 }, // Teléfono
+            { wch: 10 }  // Total
+          ];
+
+          XLSX.utils.book_append_sheet(wb, wsOrders, "Pedidos");
+          
+          // Añadir hojas individuales para cada pedido con sus detalles
+          orders.forEach((order, index) => {
+            if (order.items && order.items.length > 0) {
+              const orderDetailData = [
+                ['DETALLE DE PEDIDO'],
+                [''],
+                ['Nº Pedido:', order.orderId],
+                ['Cliente:', order.clientName],
+                ['Teléfono:', order.clientPhone],
+                ['Fecha:', new Date(order.date).toLocaleString()],
+                [''],
+                ['PRODUCTOS'],
+                ['Producto', 'Categoría', 'Cantidad', 'Precio Unitario', 'Subtotal']
+              ];
+              
+              order.items.forEach(item => {
+                const subtotal = item.precio * item.cantidad;
+                orderDetailData.push([
+                  item.nombre,
+                  item.categoria,
+                  item.cantidad,
+                  item.precio,
+                  subtotal
+                ]);
+              });
+              
+              orderDetailData.push(['', '', '', 'TOTAL:', order.total]);
+              
+              const wsOrderDetail = XLSX.utils.aoa_to_sheet(orderDetailData);
+              XLSX.utils.book_append_sheet(wb, wsOrderDetail, `Pedido ${index + 1}`);
+            }
+          });
+        }
+
+        // Generar nombre del archivo con fecha actual
+        const dateStr = new Date().toISOString().split('T')[0];
+        const fileName = `Reporte_Ventas_${dateStr}.xlsx`;
+
+        // Descargar archivo
+        XLSX.writeFile(wb, fileName);
+        
+        showAlert('Reporte exportado correctamente');
+      } catch (error) {
+        console.error('Error al exportar a Excel:', error);
+        showAlert('Error al exportar el archivo', 'danger');
+      }
+    }
+
+    // Función para imprimir
+    function printReport() {
+      window.print();
+    }
+
+    // Eventos
+    generateReportBtn.addEventListener('click', generateReport);
+    exportExcelBtn.addEventListener('click', exportToExcel);
+    printReportBtn.addEventListener('click', printReport);
+
+    // Iniciar con el reporte del mes actual
+    document.addEventListener('DOMContentLoaded', generateReport);
+  </script>
+</body>
+</html>
