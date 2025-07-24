@@ -1,36 +1,35 @@
 /**
  * Utilidad para diagnosticar problemas con las imágenes
  */
-import fs from 'fs';
 import path from 'path';
 import logger from './logger';
+import { existeDirectorio } from './logic/imageDebugger/existeDirectorio';
+import { listarArchivosDirectorio } from './logic/imageDebugger/listarArchivosDirectorio';
+import { logInfoDirectorio } from './logic/imageDebugger/logInfoDirectorio';
 
 export function verificarRutasImagenes() {
   logger.info('Verificando rutas de imágenes...');
 
-  // Comprobar si existe el directorio de imágenes
   const dirImagenes = path.resolve(process.cwd(), 'src/data/images');
   logger.info(`Ruta de imágenes absoluta: ${dirImagenes}`);
   
-  if (!fs.existsSync(dirImagenes)) {
+  if (!existeDirectorio(dirImagenes)) {
     logger.error(`El directorio de imágenes no existe: ${dirImagenes}`);
     logger.info(`Directorios en la carpeta data:`);
     
     const dirData = path.resolve(process.cwd(), 'src/data');
-    if (fs.existsSync(dirData)) {
-      const archivos = fs.readdirSync(dirData);
-      logger.info(archivos.join(', '));
+    if (existeDirectorio(dirData)) {
+      const archivos = listarArchivosDirectorio(dirData);
+      logInfoDirectorio(dirData, archivos);
     } else {
       logger.error(`El directorio 'src/data' no existe`);
     }
-    
     return false;
   }
   
   logger.info(`Directorio de imágenes encontrado. Contenido:`);
-  const imagenes = fs.readdirSync(dirImagenes);
-  logger.info(`Archivos en directorio: ${imagenes.length}`);
-  logger.info(`Primeras 5 imágenes: ${imagenes.slice(0, 5).join(', ')}`);
+  const imagenes = listarArchivosDirectorio(dirImagenes);
+  logInfoDirectorio(dirImagenes, imagenes);
   
   return true;
 }
