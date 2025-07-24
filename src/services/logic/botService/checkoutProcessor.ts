@@ -5,6 +5,8 @@ import { InvoiceGenerator } from '../../../utils/invoiceGenerator';
 import fs from 'fs-extra';
 import logger from '../../../utils/logger';
 import { OrderService } from '../../orderService';
+import { generarYEnviarFacturaPDF } from './handler/checkoutProcessor/facturaUtils';
+import { generarResumenPedido } from './handler/checkoutProcessor/pedidoUtils';
 
 export class CheckoutProcessor {
   constructor(
@@ -40,28 +42,8 @@ export class CheckoutProcessor {
         etapaPedido: 'confirmacion',
       });
 
-      let resumen = `¡Gracias por proporcionar tus datos!\n\n*Resumen de tu pedido:*\n\n`;
-
-      carrito.forEach((item, index) => {
-        const subtotal = item.precio * item.cantidad;
-        const precioFormateado = item.precio.toFixed(2).replace('.', ',');
-        const subtotalFormateado = subtotal.toFixed(2).replace('.', ',');
-
-        resumen += `${index + 1}. ${item.nombre} (${item.categoria})\n` +
-                  `   $${precioFormateado} x ${item.cantidad} = $${subtotalFormateado}\n\n`;
-      });
-
       const total = this.cartService.getCartTotal(userId);
-      const totalFormateado = total.toFixed(2).replace('.', ',');
-
-      resumen += `💰 *Total a pagar: $${totalFormateado}*\n\n`;
-      resumen += `👤 *Datos del cliente:*\n`;
-      resumen += `📝 Nombre: ${datosCliente.nombre}\n`;
-      resumen += `🏠 Dirección: ${datosCliente.direccion}\n`;
-      resumen += `📱 Teléfono: ${datosCliente.telefono}\n\n`;
-      resumen += `¿Deseas confirmar este pedido? Responde con *SI* para confirmar o *NO* para cancelar.`;
-
-      return resumen;
+      return generarResumenPedido(carrito, datosCliente, total);
     }
 
     if (etapaPedido === 'confirmacion') {
@@ -94,13 +76,8 @@ export class CheckoutProcessor {
             notes: `Pedido realizado por WhatsApp (${userId})`
           });
 
-          const pdfPath = await InvoiceGenerator.generateInvoicePDF(invoiceData);
-          const pdfBuffer = fs.readFileSync(pdfPath);
-          const invoiceMedia = new MessageMedia(
-            'application/pdf',
-            pdfBuffer.toString('base64'),
-            `factura-${invoiceNumber}.pdf`
-          );
+          // Usa la utilidad aquí
+          const { invoiceMedia, pdfPath } = await generarYEnviarFacturaPDF(invoiceData, invoiceNumber);
 
           this.stateManager.updateState(userId, {
             lastCategory: 'pedido_completo',
