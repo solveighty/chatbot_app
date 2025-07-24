@@ -1,6 +1,14 @@
 import { Client, LocalAuth, Message, MessageMedia } from 'whatsapp-web.js';
-import { ClientOptions } from './types';
+import { ClientOptions } from './types/types';
 import logger from '../utils/logger';
+import {
+  handleQR,
+  handleReady,
+  handleMessage,
+  handleAuthFailure,
+  handleDisconnected,
+  handleError
+} from './handler/clientEventHandlers';
 
 export class WhatsAppClient {
     private client: Client;
@@ -17,63 +25,20 @@ export class WhatsAppClient {
         this.messageHandler = messageHandler;
     }
 
+    private registerEventHandlers(): void {
+        this.client.on('qr', handleQR);
+        this.client.on('ready', handleReady);
+        this.client.on('message', (message) =>
+          handleMessage(message, this.messageHandler, this.client)
+        );
+        this.client.on('auth_failure', handleAuthFailure);
+        this.client.on('disconnected', handleDisconnected);
+        this.client.on('error', handleError);
+    }
+
     public initialize(): void {
-        this.client.on('qr', (qr) => {
-            logger.info('QR Code recibido. Escanea con tu aplicación WhatsApp:');
-        });
-
-        this.client.on('ready', () => {
-            logger.info('Cliente WhatsApp está listo y conectado.');
-        });
-
-        this.client.on('message', async (message) => {
-            const isGroup = message.from.includes('@g.us');
-            
-            if (isGroup) {
-                logger.info(`Mensaje de grupo ignorado: ${message.body}`);
-                return;
-            }
-            
-            const response = await this.messageHandler(message);
-            
-            if (response) {
-                try {
-                    if (typeof response === 'string') {
-                        await message.reply(response);
-                    } else if (response.invoiceMedia) {
-                        // Enviar el mensaje de confirmación
-                        await message.reply(response.text);
-                        
-                        // Esperar un segundo y enviar la factura como PDF
-                        setTimeout(async () => {
-                            await message.reply(response.invoiceMedia as MessageMedia, undefined, {
-                                caption: `📝 Factura de tu pedido`
-                            });
-                        }, 1000);
-                    } else if (response.media) {
-                        await this.client.sendMessage(message.from, response.media, { 
-                            caption: response.text 
-                        });
-                    } else {
-                        await message.reply(response.text);
-                    }
-                } catch (error) {
-                    logger.error(`Error al enviar respuesta: ${error}`);
-                }
-            }
-        });
-
-        this.client.on('auth_failure', (error) => {
-            logger.error(`Error de autenticación: ${error}`);
-        });
-        this.client.on('disconnected', (reason) => {
-            logger.info(`Cliente desconectado: ${reason}`);
-        });
-        this.client.on('error', (error) => {
-            logger.error(`Error del cliente: ${error}`);
-        });
+        this.registerEventHandlers();
         logger.info('Inicializando cliente de WhatsApp...');
-
         this.client.initialize();
     }
 }
