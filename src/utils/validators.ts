@@ -1,11 +1,9 @@
 import logger from './logger';
-
-export interface ClientData {
-  nombre: string;
-  direccion: string;
-  telefono: string;
-  valido: boolean;
-}
+import { ClientData } from './types/ClientData';
+import { esNombreValido } from './logic/validator/esNombreValido';
+import { esTelefonoValido } from './logic/validator/esTelefonoValido';
+import { parsearDatosCliente } from './logic/validator/parsearDatosCliente';
+import { construirRespuestaCliente } from './logic/validator/construirRespuestaCliente';
 
 export class DataValidator {
   /**
@@ -13,60 +11,26 @@ export class DataValidator {
    */
   public static validarDatosCliente(datosTexto: string): ClientData {
     try {
-      // dividir el texto en líneas
-      const lineas = datosTexto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      
-      // si no hay suficientes líneas, retornar datos inválidos
+      const { nombre, direccion, telefono, lineas } = parsearDatosCliente(datosTexto);
+
       if (lineas.length < 2) {
-        return {
-          nombre: '',
-          direccion: '',
-          telefono: '',
-          valido: false
-        };
+        return construirRespuestaCliente('', '', '', false);
       }
 
-      // extraer nombre, dirección y teléfono
-      let nombre = lineas[0];
-      let direccion = lineas.length >= 3 ? lineas[1] : 'Recoge en Monasterio';
-      let telefono = lineas.length >= 3 ? lineas[2] : lineas[1];
-
-      // validar nombre
-      if (nombre.length < 3 || /^\d+$/.test(nombre)) {
+      if (!esNombreValido(nombre)) {
         logger.info(`Nombre inválido: "${nombre}"`);
-        return {
-          nombre,
-          direccion,
-          telefono,
-          valido: false
-        };
+        return construirRespuestaCliente(nombre, direccion, telefono, false);
       }
 
-      // validar telefono
-      if (!/\d{7,15}/.test(telefono.replace(/\D/g, ''))) {
+      if (!esTelefonoValido(telefono)) {
         logger.info(`Teléfono inválido: "${telefono}"`);
-        return {
-          nombre,
-          direccion,
-          telefono,
-          valido: false
-        };
+        return construirRespuestaCliente(nombre, direccion, telefono, false);
       }
 
-      return {
-        nombre,
-        direccion,
-        telefono,
-        valido: true
-      };
+      return construirRespuestaCliente(nombre, direccion, telefono, true);
     } catch (error) {
       logger.error(`Error validando datos del cliente: ${error}`);
-      return {
-        nombre: '',
-        direccion: '',
-        telefono: '',
-        valido: false
-      };
+      return construirRespuestaCliente('', '', '', false);
     }
   }
 }
