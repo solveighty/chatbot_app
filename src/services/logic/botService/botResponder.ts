@@ -4,14 +4,14 @@ import { CommandHandler } from '../../../handlers/commandHandler';
 import logger from '../../../utils/logger';
 import { BotService } from '../../botService';
 import { OrderService } from '../../orderService';
-import { CantidadHandler } from './handler/cantidadHandler';
-import { CarritoHandler } from './handler/carritoHandler';
-import { CategoriaHandler } from './handler/categoriaHandler';
-import { CompraHandler } from './handler/compraHandler';
-import { SeleccionCategoriaHandler } from './handler/seleccionCategoriaHandler';
-import { SeleccionProductoHandler } from './handler/seleccionProductoHandler';
-import { SolicitudImagenHandler } from './handler/solicitudImagenHandler';
-import { RespuestaGenericaHandler } from './handler/respuestaGenericaHandler';
+import { CantidadHandler } from './handler/botResponder/cantidadHandler';
+import { CarritoHandler } from './handler/botResponder/carritoHandler';
+import { CategoriaHandler } from './handler/botResponder/categoriaHandler';
+import { CompraHandler } from './handler/botResponder/compraHandler';
+import { SeleccionCategoriaHandler } from './handler/botResponder/seleccionCategoriaHandler';
+import { SeleccionProductoHandler } from './handler/botResponder/seleccionProductoHandler';
+import { SolicitudImagenHandler } from './handler/botResponder/solicitudImagenHandler';
+import { RespuestaGenericaHandler } from './handler/botResponder/respuestaGenericaHandler';
 
 export class BotResponder {
   private cantidadHandler: CantidadHandler;

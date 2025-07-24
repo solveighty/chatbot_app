@@ -1,4 +1,4 @@
-import { ICartService, IConversationStateManager } from '../../../../interfaces/services';
+import { ICartService, IConversationStateManager } from '../../../../../interfaces/services';
 
 export class CantidadHandler {
   constructor(
