@@ -1,4 +1,4 @@
-import { IProductService, IConversationStateManager } from '../../../../interfaces/services';
+import { IProductService, IConversationStateManager } from '../../../../../interfaces/services';
 
 export class CompraHandler {
   constructor(

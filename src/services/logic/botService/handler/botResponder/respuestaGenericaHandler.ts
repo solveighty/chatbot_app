@@ -1,4 +1,4 @@
-import { IResponseService, IConversationStateManager } from '../../../../interfaces/services';
+import { IResponseService, IConversationStateManager } from '../../../../../interfaces/services';
 
 export class RespuestaGenericaHandler {
   constructor(
