@@ -1,5 +1,5 @@
 import { IProductService } from '../../../interfaces/services';
-import { CommandResult } from '../../types/commandResult';
+import { CommandResult } from '../types/commandResult';
 
 export function getProductList(
   productService: IProductService

@@ -1,5 +1,5 @@
 import { ICartService, IProductService, IResponseService } from '../interfaces/services';
-import { CommandResult } from './types/commandResult';
+import { CommandResult } from './commandHandler/types/commandResult';
 import { processNumericCode } from './commandHandler/logic/processNumericCode';
 import { processDirectBuyCommand } from './commandHandler/logic/processDirectBuyCommand';
 import { getCartSummary } from './commandHandler/logic/getCartSummary';

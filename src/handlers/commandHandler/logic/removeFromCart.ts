@@ -1,5 +1,5 @@
 import { ICartService } from '../../../interfaces/services';
-import { CommandResult } from '../../types/commandResult';
+import { CommandResult } from '../types/commandResult';
 
 export function removeFromCart(
   message: string,
