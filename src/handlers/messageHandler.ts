@@ -1,6 +1,6 @@
 import { Message, MessageMedia } from 'whatsapp-web.js';
 import { BotService } from '../services/botService';
-import logger from '../utils/logger';
+import { logMessageProcessing, logMessageError } from './messageHandler/logMessageProcessing';
 
 export const handleMessage = async (
     message: Message, 
@@ -8,12 +8,12 @@ export const handleMessage = async (
 ): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia } | undefined> => {
     try {
         if (message.body) {
-            logger.debug(`Procesando mensaje: ${message.body}`);
+            logMessageProcessing(message.body);
             return await botService.generateResponse(message);
         }
         return undefined;
     } catch (error) {
-        logger.error(`Error al procesar el mensaje: ${error}`);
+        logMessageError(error);
         return undefined;
     }
 };
