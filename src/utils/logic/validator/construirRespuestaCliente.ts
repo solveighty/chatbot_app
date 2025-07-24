@@ -1,4 +1,4 @@
-import { ClientData } from '../../types/ClientData';
+import { ClientData } from './types/ClientData';
 
 export function construirRespuestaCliente(
   nombre: string,

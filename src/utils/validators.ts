@@ -1,5 +1,5 @@
 import logger from './logger';
-import { ClientData } from './types/ClientData';
+import { ClientData } from './logic/validator/types/ClientData';
 import { esNombreValido } from './logic/validator/esNombreValido';
 import { esTelefonoValido } from './logic/validator/esTelefonoValido';
 import { parsearDatosCliente } from './logic/validator/parsearDatosCliente';
