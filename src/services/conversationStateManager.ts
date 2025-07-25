@@ -1,5 +1,8 @@
 import { IConversationStateManager } from '../interfaces/services';
 import logger from '../utils/logger';
+import { updateStateLogic } from './logic/conversationStateManager/updateState';
+import { getStateLogic } from './logic/conversationStateManager/getState';
+import { clearStateLogic } from './logic/conversationStateManager/clearState';
 
 export class ConversationStateManager implements IConversationStateManager {
   private conversationState: Map<string, any>;
@@ -10,20 +13,16 @@ export class ConversationStateManager implements IConversationStateManager {
   }
 
   public updateState(userId: string, state: any): void {
-    const currentState = this.conversationState.get(userId) || {};
-    this.conversationState.set(userId, {
-      ...currentState,
-      ...state
-    });
+    updateStateLogic(this.conversationState, userId, state);
     logger.debug(`Estado actualizado para usuario ${userId}`);
   }
 
   public getState(userId: string): any {
-    return this.conversationState.get(userId);
+    return getStateLogic(this.conversationState, userId);
   }
 
   public clearState(userId: string): void {
-    this.conversationState.delete(userId);
+    clearStateLogic(this.conversationState, userId);
     logger.debug(`Estado eliminado para usuario ${userId}`);
   }
 }
