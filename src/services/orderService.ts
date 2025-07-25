@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import logger from '../utils/logger';
-import { CartItem } from './cartService';
+import { CartItem } from './logic/cartService/types/cartItem';
 
 export interface OrderData {
   orderId: string;
