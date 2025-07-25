@@ -1,5 +1,5 @@
 import { MessageMedia } from 'whatsapp-web.js';
-import { CartItem } from '../services/cartService';
+import { CartItem } from '../services/logic/cartService/types/cartItem';
 
 export interface PedidoResult {
   texto: string;
