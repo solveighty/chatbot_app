@@ -18,11 +18,6 @@
     "categoria": "Cake",
     "productos": [
       {
-        "nombre": "De 90 gr",
-        "precio": 1.0,
-        "imagen": "images/cake-90g.jpg"
-      },
-      {
         "nombre": "De 260 gr",
         "precio": 3.0,
         "imagen": "images/cake-260g.jpg"
@@ -85,12 +80,12 @@
     ]
   },
   {
-    "categoria": "Cruces de Tagua",
+    "categoria": "Iconos Religiosos",
     "productos": [
       {
-        "nombre": "Diferentes diseños y colores",
-        "precio": 1.5,
-        "imagen": "images/cruces-tagua.jpg"
+        "nombre": "Diferentes advocaciones, clases de madera, tamaños y diseños",
+        "precio": 3.10,
+        "imagen": "images/iconos_religiosos.jpg"
       }
     ]
   },
@@ -124,20 +119,40 @@
     "productos": [
       {
         "nombre": "Colores: crema, café y negro",
-        "precio": 1.5,
+        "precio": 2.0,
         "imagen": "images/fundas-ecologicas.jpg",
         "variantes": [
           {
-            "nombre": "Color crema",
-            "precio": 1.5
-          },
-          {
             "nombre": "Color café",
-            "precio": 1.5
+            "precio": 2.0
           },
           {
             "nombre": "Color negro",
-            "precio": 1.5
+            "precio": 2.0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "categoria": "Rosarios",
+    "productos": [
+      {
+        "nombre": "Material: Metal, Plástico, Madera",
+        "precio": 3.50,
+        "imagen": "images/rosarios.jpg",
+        "variantes": [
+          {
+            "nombre": "Rosario de Metal",
+            "precio": 3.50
+          },
+          {
+            "nombre": "Rosario de Plástico",
+            "precio": 3.50
+          },
+          {
+            "nombre": "Rosario de Madera",
+            "precio": 3.50
           }
         ]
       }
@@ -164,41 +179,6 @@
     ]
   },
   {
-    "categoria": "Medallas de San Benito",
-    "productos": [
-      {
-        "nombre": "Pequeña",
-        "precio": 1.0,
-        "imagen": "images/medalla-pequena.jpg"
-      },
-      {
-        "nombre": "Mediana",
-        "precio": 2.5,
-        "imagen": "images/medalla-mediana.jpg"
-      },
-      {
-        "nombre": "Grande",
-        "precio": 3.5,
-        "imagen": "images/medalla-grande.jpg"
-      }
-    ]
-  },
-  {
-    "categoria": "Cirios por la Paz",
-    "productos": [
-      {
-        "nombre": "Grande",
-        "precio": 5.75,
-        "imagen": "images/cirio-paz-grande.jpg"
-      },
-      {
-        "nombre": "Pequeñito",
-        "precio": 1.5,
-        "imagen": "images/cirio-paz-pequeno.jpg"
-      }
-    ]
-  },
-  {
     "categoria": "Cirios Pascuales",
     "productos": [
       {
@@ -213,82 +193,85 @@
     "productos": [
       {
         "nombre": "De 24 cm - Blanco, Verde, Amarillo, Rojo, Morado",
-        "precio": 7.0,
+        "precio": 7.20,
         "imagen": "images/cirio-24cm.jpg",
         "variantes": [
           {
             "nombre": "Color blanco",
-            "precio": 7.0
+            "precio": 7.20
           },
           {
             "nombre": "Color verde",
-            "precio": 7.0
+            "precio": 7.20
           },
           {
             "nombre": "Color amarillo",
-            "precio": 7.0
+            "precio": 7.20
           },
           {
             "nombre": "Color rojo",
-            "precio": 7.0
+            "precio": 7.20
           },
           {
             "nombre": "Color morado",
-            "precio": 7.0
+            "precio": 7.20
           }
         ]
       },
       {
         "nombre": "De 12 cm - Blanco, Verde, Amarillo, Rojo, Morado",
-        "precio": 4.25,
+        "precio": 4.35,
         "imagen": "images/cirio-12cm.jpg",
         "variantes": [
           {
             "nombre": "Color blanco",
-            "precio": 4.25
+            "precio": 4.35
           },
           {
             "nombre": "Color verde",
-            "precio": 4.25
+            "precio": 4.35
           },
           {
             "nombre": "Color amarillo",
-            "precio": 4.25
+            "precio": 4.35
           },
           {
             "nombre": "Color rojo",
-            "precio": 4.25
+            "precio": 4.35
           },
           {
             "nombre": "Color morado",
-            "precio": 4.25
+            "precio": 4.35
           }
         ]
       }
     ]
   },
   {
-    "categoria": "Llaveros y Esferos (Bambú)",
+    "categoria": "Pulseras - Denarios",
     "productos": [
       {
-        "nombre": "Llaveros",
-        "precio": 2.0,
-        "imagen": "images/llavero-bambu.jpg"
-      },
-      {
-        "nombre": "Esferos",
-        "precio": 1.5,
-        "imagen": "images/esfero-bambu.jpg"
-      }
-    ]
-  },
-  {
-    "categoria": "Pulseras (macramé)",
-    "productos": [
-      {
-        "nombre": "Diferentes colores",
-        "precio": 0.5,
-        "imagen": "images/pulsera-macrame.jpg"
+        "nombre": "Materiales: Madera, Plástico",
+        "precio": 2.5,
+        "imagen": "images/pulseras_denarios.jpg",
+        "variantes": [
+          {
+            "nombre": "Pulsera o Denario de Madera",
+            "precio": 2.5
+          },
+          {
+            "nombre": "Pulsera o Denario de Plástico",
+            "precio": 2.5
+          },
+          {
+            "nombre": "Diferentes colores",
+            "precio": 2.0
+          },
+          {
+            "nombre": "Diferentes colores",
+            "precio": 1.5
+          }
+        ]
       }
     ]
   }
