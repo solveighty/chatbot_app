@@ -2,7 +2,7 @@ export const MENSAJE_DATOS_INVALIDOS =
   `❌ *Los datos proporcionados no son válidos*\n\n` +
   `Por favor, proporciona la siguiente información en formato correcto:\n\n` +
   `1️⃣ *Tu nombre completo* (mínimo 3 caracteres)\n` +
-  `2️⃣ *Tu dirección de entrega* (o indica si recogerás en el Monasterio)\n` +
+  `2️⃣ *Tu dirección de entrega* (solo si el pedido es de otra ciudad en servicio de Servientrega, en otro caso retirar al Monasterio)\n` +
   `3️⃣ *Tu número de teléfono* (formato válido)\n\n` +
   `Ejemplo:\n` +
   `María Pérez\n` +
@@ -29,3 +29,7 @@ export const MENSAJE_PEDIDO_CANCELADO =
 
 export const MENSAJE_SOLICITAR_INFO =
   `Por favor, proporciona la información solicitada para continuar con tu pedido.`;
+
+export const MENSAJE_CON_FACTURA =
+  `📋 *Con esta factura retira tu pedido*\n\n` +
+  `Presenta esta factura al momento de retirar tu pedido en el Monasterio.`;

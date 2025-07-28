@@ -15,7 +15,7 @@ try {
     verificarRutasImagenes();
     
     // Inicializar directorio temporal para PDFs y facturas
-    InvoiceGenerator.initTempDir();
+    // InvoiceGenerator.initTempDir();
     InvoiceGenerator.cleanupOldInvoices(); // Limpiar facturas antiguas al iniciar
     
     // Configurar dependencias

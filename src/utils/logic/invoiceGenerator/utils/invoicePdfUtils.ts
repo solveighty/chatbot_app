@@ -26,7 +26,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
   doc.pipe(stream);
 
   // Cabecera
-  doc.fontSize(20).text('FACTURA DE COMPRA', { align: 'center' });
+  doc.fontSize(20).text('FACTURA PARA RETIRO', { align: 'center' });
   doc.fontSize(16).text('Monasterio Trapense', { align: 'center' });
   doc.moveDown();
 

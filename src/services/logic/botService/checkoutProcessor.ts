@@ -12,7 +12,8 @@ import {
   MENSAJE_PEDIDO_CONFIRMADO,
   MENSAJE_PEDIDO_CONFIRMADO_SIMPLE,
   MENSAJE_PEDIDO_CANCELADO,
-  MENSAJE_SOLICITAR_INFO
+  MENSAJE_SOLICITAR_INFO,
+  MENSAJE_CON_FACTURA
 } from './handler/checkoutProcessor/messages/checkoutMessages';
 import { PedidoStateUtils } from './handler/checkoutProcessor/pedidoStateUtils';
 
@@ -24,7 +25,7 @@ export class CheckoutProcessor {
     private readonly orderService: OrderService
   ) {}
 
-  public async procesarCheckout(userId: string, mensaje: string): Promise<string | { text: string, invoiceMedia?: MessageMedia }> {
+  public async procesarCheckout(userId: string, mensaje: string): Promise<string | { text: string, invoiceMedia?: MessageMedia, invoiceCaption?: string }> {
     const state = this.stateManager.getState(userId);
     const { etapaPedido } = state;
     const carrito = this.cartService.getCart(userId);
@@ -97,7 +98,8 @@ export class CheckoutProcessor {
 
           return {
             text: MENSAJE_PEDIDO_CONFIRMADO(invoiceNumber, totalFormateado, datosCliente.nombre, datosCliente.telefono),
-            invoiceMedia: invoiceMedia
+            invoiceMedia: invoiceMedia,
+            invoiceCaption: MENSAJE_CON_FACTURA
           };
         } catch (error) {
           logger.error(`Error al generar factura PDF: ${error}`);

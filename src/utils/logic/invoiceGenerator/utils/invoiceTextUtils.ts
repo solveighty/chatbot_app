@@ -10,7 +10,7 @@ export function generateInvoiceText(data: InvoiceData): string {
     .padStart(2, "0")}`;
 
   // Cabecera de la factura
-  let factura = `*FACTURA DE COMPRA*\n` +
+  let factura = `*FACTURA PARA RETIRO*\n` +
                 `*Monasterio Trapense*\n\n` +
                 `📝 *Nº Factura:* ${invoiceNumber}\n` +
                 `📅 *Fecha:* ${fechaFormateada}\n\n` +

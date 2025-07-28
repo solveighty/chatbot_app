@@ -5,7 +5,7 @@ import { logMessageProcessing, logMessageError } from './messageHandler/logMessa
 export const handleMessage = async (
     message: Message, 
     botService: BotService
-): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia } | undefined> => {
+): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia, invoiceCaption?: string } | undefined> => {
     try {
         if (message.body) {
             logMessageProcessing(message.body);

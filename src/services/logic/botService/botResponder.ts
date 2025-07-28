@@ -42,7 +42,7 @@ export class BotResponder {
     this.respuestaGenericaHandler = new RespuestaGenericaHandler(this.responseService, this.stateManager);
   }
 
-  public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia }> {
+  public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia, invoiceCaption?: string }> {
     try {
       const userId = message.from;
       const userMessage = message.body;

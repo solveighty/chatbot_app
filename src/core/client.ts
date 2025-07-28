@@ -12,11 +12,11 @@ import {
 
 export class WhatsAppClient {
     private client: Client;
-    private messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia } | undefined>;
+    private messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia, invoiceCaption?: string } | undefined>;
 
     constructor(
         options: ClientOptions,
-        messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia } | undefined>
+        messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia, invoiceCaption?: string } | undefined>
     ) {
         this.client = new Client({
             authStrategy: new LocalAuth(),

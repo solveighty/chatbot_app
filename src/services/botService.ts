@@ -43,14 +43,14 @@ export class BotService {
    * @returns Respuesta generada
    */
 
-  public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia }> {
+  public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia, invoiceCaption?: string }> {
     return this.botResponder.generateResponse(message);
   }
   
   /**
    * Procesa el checkout del pedido
    */
-  public async procesarCheckout(userId: string, mensaje: string): Promise<string | { text: string, invoiceMedia?: MessageMedia }> {
+  public async procesarCheckout(userId: string, mensaje: string): Promise<string | { text: string, invoiceMedia?: MessageMedia, invoiceCaption?: string }> {
     return this.checkoutProcessor.procesarCheckout(userId, mensaje);
   }
 

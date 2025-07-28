@@ -74,3 +74,5 @@ export class CartService implements ICartService {
     logger.info(`Carrito de ${userId} vaciado`);
   }
 }
+
+export { CartItem };

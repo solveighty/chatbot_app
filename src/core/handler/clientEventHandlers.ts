@@ -11,7 +11,7 @@ export function handleReady() {
 
 export async function handleMessage(
   message: Message,
-  messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia } | undefined>,
+  messageHandler: (message: Message) => Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia, invoiceCaption?: string } | undefined>,
   client: Client
 ) {
   const isGroup = message.from.includes('@g.us');
@@ -30,7 +30,7 @@ export async function handleMessage(
         await message.reply(response.text);
         setTimeout(async () => {
           await message.reply(response.invoiceMedia as MessageMedia, undefined, {
-            caption: `📝 Factura de tu pedido`
+            caption: response.invoiceCaption || `📝 Factura de tu pedido`
           });
         }, 1000);
       } else if (response.media) {

@@ -1,5 +1,5 @@
-import logger from '../../../utils/logger';
-import { OrderData } from './types/orderData';
+import logger from '../../../../utils/logger';
+import { OrderData } from '../types/orderData';
 
 export function getOrdersByDateRangeLogic(
   orders: OrderData[],

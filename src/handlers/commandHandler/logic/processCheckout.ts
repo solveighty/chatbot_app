@@ -16,7 +16,7 @@ export function processCheckout(
     response:
       `Por favor, proporciona los siguientes datos para finalizar tu compra:\n\n` +
       `1️⃣ *Tu nombre completo* (mínimo 3 caracteres)\n` +
-      `2️⃣ *Tu dirección de entrega* (o indica si recogerás en el Monasterio)\n` +
+      `2️⃣ *Tu dirección de entrega* (solo si el pedido es de otra ciudad en servicio de Servientrega, en otro caso retirar al Monasterio)\n` +
       `3️⃣ *Tu número de teléfono* (formato válido)\n\n` +
       `Ejemplo:\n` +
       `María Pérez\n` +
