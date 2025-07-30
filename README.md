@@ -18,7 +18,6 @@ Este proyecto implementa un chatbot de WhatsApp que gestiona pedidos y un sistem
 
 El sistema utiliza HiveMQ como broker MQTT online, lo que elimina la necesidad de configurar un broker local:
 
-- **Cluster URL**: `147c3fd5edc245df89abcab67f04047b.s1.eu.hivemq.cloud`
 - **Puerto TLS**: `8883` (para el servidor)
 - **Puerto WebSocket**: `8884` (para el cliente web)
 
@@ -83,7 +82,7 @@ npm start
 
 ### Reportes de Ventas
 
-1. Abre `http://localhost:3000/reportes_ventas.html` en tu navegador
+1. Abre `reportes_ventas.html` en tu navegador
 2. El sistema detectará automáticamente el servidor via MQTT
 3. Selecciona fechas y genera reportes
 
