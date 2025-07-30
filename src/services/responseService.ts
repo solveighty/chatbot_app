@@ -14,7 +14,7 @@ export class ResponseService implements IResponseService {
 
   constructor() {
     try {
-      const filePath = path.resolve(process.cwd(), 'src/data/responses.json');
+      const filePath = path.resolve(process.cwd(), 'dist/data/responses.json');
       const data = fs.readFileSync(filePath, 'utf8');
       this.responses = JSON.parse(data);
       logger.info('Respuestas cargadas correctamente');

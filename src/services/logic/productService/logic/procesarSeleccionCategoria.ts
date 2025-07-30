@@ -43,7 +43,7 @@ export async function procesarSeleccionCategoriaLogic(
   try {
     if (productosCat.length > 0 && productosCat[0].imagen) {
       const imagenPath = productosCat[0].imagen;
-      const mediaPath = path.resolve(process.cwd(), "src/data", imagenPath);
+      const mediaPath = path.resolve(process.cwd(), "dist/data", imagenPath);
 
       logger.info(`Intentando cargar imagen desde: ${mediaPath}`);
 

@@ -31,7 +31,7 @@ export class ProductService implements IProductService {
 
   constructor() {
     try {
-      const filePath = path.resolve(process.cwd(), "src/data/products.json");
+      const filePath = path.resolve(process.cwd(), "dist/data/products.json");
       const data = fs.readFileSync(filePath, "utf8");
       this.productos = JSON.parse(data);
       logger.info("Productos cargados correctamente");

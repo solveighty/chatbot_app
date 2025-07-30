@@ -11,7 +11,7 @@ export async function obtenerImagenProductoLogic(
     if (producto && producto.imagen) {
       const mediaPath = path.resolve(
         process.cwd(),
-        "src/data",
+        "dist/data",
         producto.imagen
       );
 

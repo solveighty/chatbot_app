@@ -8,8 +8,8 @@ function ensureDirectoryExistence(dirPath) {
     }
 }
 
-// Copia archivos JSON desde src a dist manteniendo la estructura de directorios
-function copyJsonFiles(sourceDir, targetDir) {
+// Copia archivos JSON e imágenes desde assets a dist/data
+function copyAssets(sourceDir, targetDir) {
     const items = fs.readdirSync(sourceDir);
     
     for (const item of items) {
@@ -18,8 +18,8 @@ function copyJsonFiles(sourceDir, targetDir) {
         
         if (fs.statSync(sourcePath).isDirectory()) {
             ensureDirectoryExistence(targetPath);
-            copyJsonFiles(sourcePath, targetPath);
-        } else if (path.extname(item) === '.json') {
+            copyAssets(sourcePath, targetPath);
+        } else if (path.extname(item) === '.json' || path.extname(item) === '.jpg' || path.extname(item) === '.png' || path.extname(item) === '.jpeg') {
             ensureDirectoryExistence(path.dirname(targetPath));
             fs.copyFileSync(sourcePath, targetPath);
             console.log(`Copied: ${sourcePath} -> ${targetPath}`);
@@ -27,11 +27,11 @@ function copyJsonFiles(sourceDir, targetDir) {
     }
 }
 
-// Copiar archivos desde src/data a dist/data
-const sourceDir = path.join(__dirname, '../src');
-const targetDir = path.join(__dirname, '../dist');
+// Copiar archivos desde assets a dist/data
+const sourceDir = path.join(__dirname, '../assets');
+const targetDir = path.join(__dirname, '../dist/data');
 
 ensureDirectoryExistence(targetDir);
-copyJsonFiles(sourceDir, targetDir);
+copyAssets(sourceDir, targetDir);
 
-console.log('All JSON files copied successfully!');
+console.log('All assets copied successfully!');
