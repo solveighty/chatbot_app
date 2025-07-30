@@ -143,6 +143,15 @@
       background-color: #0288D1;
     }
 
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #C62828;
+    }
+
     .btn:active {
       transform: translateY(1px);
     }
@@ -230,6 +239,11 @@
     .alert-danger {
       background-color: #FFEBEE;
       color: #B71C1C;
+    }
+
+    .alert-success {
+      background-color: #E8F5E8;
+      color: #2E7D32;
     }
 
     .loading {
@@ -396,6 +410,9 @@
       <button id="printReportBtn" class="btn btn-info" disabled>
         <i class="fas fa-print"></i> Imprimir Reporte
       </button>
+      <button id="clearOrdersBtn" class="btn btn-danger">
+        <i class="fas fa-trash"></i> Limpiar Órdenes
+      </button>
     </div>
 
     <div class="loading">
@@ -415,6 +432,377 @@
   <!-- Incluir SheetJS para exportación a Excel -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
+  <!-- Incluir MQTT.js para comunicación MQTT -->
+  <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+  
+  <script>
+         /**
+      * Cliente MQTT para navegador que se conecta al broker HiveMQ online
+      * Usa WebSockets seguros (WSS) para la comunicación con el broker MQTT
+      * 
+      * FLUJO DE DESCUBRIMIENTO AUTOMÁTICO:
+      * 1. El servidor detecta su IP real y la publica via MQTT a HiveMQ
+      * 2. Este cliente se conecta al broker HiveMQ y recibe la IP del servidor
+      * 3. Si MQTT falla, usa descubrimiento local como fallback
+      * 4. Si todo falla, usa localhost:3000 como último recurso
+      */
+    class MqttWebClient {
+      constructor() {
+        this.client = null;
+        this.connected = false;
+        this.serverInfo = null;
+        this.onServerInfoCallback = null;
+        this.reconnectInterval = null;
+        this.config = {
+          broker: '147c3fd5edc245df89abcab67f04047b.s1.eu.hivemq.cloud',
+          port: 8884, // Puerto WebSocket de HiveMQ
+          topic: 'monasterio/server-info',
+          clientId: `monasterio-web-client-${Date.now()}`,
+          username: 'monasterio',
+          password: 'Monasterio123'
+        };
+      }
+
+      /**
+       * Inicia la conexión al broker MQTT
+       */
+      async start() {
+        try {
+          console.log('🚀 Iniciando cliente MQTT Web...');
+          console.log('📋 Configuración:', this.config);
+          
+          // Verificar que MQTT.js esté disponible
+          if (!window.mqtt) {
+            throw new Error('MQTT.js no está disponible en el navegador');
+          }
+          
+          // Probar conectividad WebSocket básica
+          await this.testWebSocketConnectivity();
+          
+          // Intentar conectar al broker MQTT
+          await this.connect();
+          
+          // Configurar reconexión automática
+          this.setupReconnection();
+          
+        } catch (error) {
+          console.error('❌ Error al iniciar cliente MQTT Web:', error);
+          console.log('🔄 Usando fallback de descubrimiento local...');
+          this.fallbackToLocalDiscovery();
+        }
+      }
+
+      /**
+       * Prueba la conectividad WebSocket básica
+       */
+      async testWebSocketConnectivity() {
+        return new Promise((resolve, reject) => {
+          try {
+            const wsUrl = `wss://${this.config.broker}:${this.config.port}`;
+            console.log('🧪 Probando conectividad WebSocket a:', wsUrl);
+            
+            const testWs = new WebSocket(wsUrl);
+            
+            testWs.onopen = () => {
+              console.log('✅ Prueba de WebSocket exitosa');
+              testWs.close();
+              resolve();
+            };
+            
+            testWs.onerror = (error) => {
+              console.error('❌ Error en prueba de WebSocket:', error);
+              reject(new Error('No se puede conectar al WebSocket del broker'));
+            };
+            
+            testWs.onclose = () => {
+              console.log('🔌 Prueba de WebSocket cerrada');
+            };
+            
+            // Timeout de 10 segundos
+            setTimeout(() => {
+              if (testWs.readyState !== WebSocket.OPEN) {
+                testWs.close();
+                reject(new Error('Timeout en prueba de WebSocket'));
+              }
+            }, 10000);
+            
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+
+            /**
+       * Conecta al broker MQTT usando WebSockets
+       */
+      async connect() {
+        return new Promise((resolve, reject) => {
+          try {
+            // Usar MQTT.js para conectar al broker HiveMQ
+            const mqtt = window.mqtt;
+            if (!mqtt) {
+              reject(new Error('MQTT.js no está disponible'));
+              return;
+            }
+
+            console.log('🔗 Intentando conectar a MQTT broker:', this.config.broker, 'puerto:', this.config.port);
+            
+            const wsUrl = `wss://${this.config.broker}:${this.config.port}`;
+            console.log('🌐 URL de conexión WebSocket:', wsUrl);
+            
+            // Configuración de conexión MQTT
+            const options = {
+              clientId: this.config.clientId,
+              username: this.config.username,
+              password: this.config.password,
+              clean: true,
+              reconnectPeriod: 5000,
+              connectTimeout: 30000,
+              rejectUnauthorized: false, // Para desarrollo
+              keepalive: 60,
+              protocolVersion: 4 // MQTT 3.1.1
+            };
+            
+            console.log('⚙️ Opciones de conexión:', options);
+            
+            this.client = mqtt.connect(wsUrl, options);
+
+            this.client.on('connect', () => {
+              console.log('✅ Conectado al broker HiveMQ online');
+              this.connected = true;
+              this.subscribeToServerInfo();
+              resolve();
+            });
+
+            this.client.on('message', (topic, message) => {
+              console.log('📨 Mensaje MQTT recibido:', topic, message.toString());
+              this.handleMessage(topic, message.toString());
+            });
+
+            this.client.on('error', (error) => {
+              console.error('❌ Error en conexión MQTT:', error);
+              console.error('❌ Detalles del error:', {
+                message: error.message,
+                stack: error.stack,
+                type: error.type
+              });
+              reject(error);
+            });
+
+            this.client.on('close', () => {
+              console.log('🔌 Conexión MQTT cerrada');
+              this.connected = false;
+            });
+
+            this.client.on('reconnect', () => {
+              console.log('🔄 Reconectando al broker MQTT...');
+            });
+
+            this.client.on('offline', () => {
+              console.log('📴 Cliente MQTT desconectado');
+              this.connected = false;
+            });
+
+          } catch (error) {
+            console.error('❌ Error al crear conexión MQTT:', error);
+            reject(error);
+          }
+        });
+      }
+
+      /**
+       * Se suscribe al topic de información del servidor
+       */
+      subscribeToServerInfo() {
+        if (!this.connected || !this.client) {
+          console.warn('⚠️ No conectado al broker MQTT');
+          return;
+        }
+
+        console.log('📡 Suscribiéndose al topic:', this.config.topic);
+        
+        this.client.subscribe(this.config.topic, { qos: 1 }, (error) => {
+          if (error) {
+            console.error('❌ Error al suscribirse:', error);
+          } else {
+            console.log(`✅ Suscrito al topic: ${this.config.topic}`);
+          }
+        });
+      }
+
+      /**
+       * Maneja los mensajes recibidos del broker
+       */
+      handleMessage(topic, message) {
+        try {
+          console.log('📨 Procesando mensaje MQTT - Topic:', topic, 'Message:', message);
+          
+          if (topic === this.config.topic) {
+            const serverInfo = JSON.parse(message);
+            console.log('✅ Información del servidor recibida:', serverInfo);
+            
+            this.serverInfo = serverInfo;
+            
+            if (this.onServerInfoCallback) {
+              this.onServerInfoCallback(serverInfo);
+            }
+          } else {
+            console.log('📨 Mensaje recibido en topic diferente:', topic);
+          }
+        } catch (error) {
+          console.error('❌ Error al procesar mensaje:', error);
+        }
+      }
+
+      /**
+       * Configura reconexión automática
+       */
+      setupReconnection() {
+        this.reconnectInterval = setInterval(() => {
+          if (!this.connected) {
+            console.log('🔄 Intentando reconectar al broker HiveMQ...');
+            this.connect().catch((error) => {
+              console.log('❌ Reconexión fallida:', error.message);
+              console.log('🔄 Usando descubrimiento local...');
+              this.fallbackToLocalDiscovery();
+            });
+          }
+        }, 10000); // Intentar cada 10 segundos
+      }
+
+      /**
+       * Método de respaldo para descubrir el servidor localmente
+       */
+      fallbackToLocalDiscovery() {
+        console.log('Usando descubrimiento local de servidor...');
+        
+        // Intentar puertos comunes
+        const commonPorts = [3000, 3001, 8080, 8000, 5000];
+        const localIPs = this.getLocalIPs();
+        
+        // Probar conexiones de forma secuencial para evitar sobrecarga
+        this.testConnectionsSequentially(localIPs, commonPorts);
+      }
+
+             /**
+        * Obtiene las IPs locales del dispositivo (solo como fallback)
+        */
+       getLocalIPs() {
+         const ips = ['127.0.0.1', 'localhost'];
+         
+         // Intentar obtener IPs de la red local
+         if (window.location.hostname && window.location.hostname !== 'localhost') {
+           ips.push(window.location.hostname);
+         }
+         
+         return ips;
+       }
+
+      /**
+       * Prueba conexiones de forma secuencial
+       */
+      async testConnectionsSequentially(ips, ports) {
+        for (const ip of ips) {
+          for (const port of ports) {
+            const found = await this.testServerConnection(ip, port);
+            if (found) {
+              return; // Detener si encontramos el servidor
+            }
+            // Pequeña pausa entre intentos
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        
+        // Si no se encontró ningún servidor, usar configuración por defecto
+        console.log('No se encontró servidor, usando configuración por defecto');
+        const defaultInfo = { ip: 'localhost', port: 3000 };
+        this.serverInfo = defaultInfo;
+        if (this.onServerInfoCallback) {
+          this.onServerInfoCallback(defaultInfo);
+        }
+      }
+
+      /**
+       * Prueba la conexión a un servidor específico
+       */
+      async testServerConnection(ip, port) {
+        try {
+          const url = `http://${ip}:${port}/api/reports/sales`;
+          const response = await fetch(url, { 
+            method: 'GET',
+            mode: 'no-cors' // Para evitar problemas de CORS
+          });
+          
+          if (response.status === 200 || response.type === 'opaque') {
+            console.log(`Servidor encontrado en ${ip}:${port}`);
+            
+            const serverInfo = {
+              ip: ip,
+              port: port,
+              timestamp: new Date().toISOString(),
+              hostname: ip
+            };
+            
+            this.serverInfo = serverInfo;
+            
+            if (this.onServerInfoCallback) {
+              this.onServerInfoCallback(serverInfo);
+            }
+            
+            return true;
+          }
+        } catch (error) {
+          // Silenciar errores de conexión
+        }
+        
+        return false;
+      }
+
+      /**
+       * Establece el callback para cuando se reciba información del servidor
+       */
+      onServerInfo(callback) {
+        this.onServerInfoCallback = callback;
+      }
+
+      /**
+       * Detiene el cliente MQTT
+       */
+      stop() {
+        if (this.client) {
+          this.client.end();
+          this.client = null;
+        }
+        
+        if (this.reconnectInterval) {
+          clearInterval(this.reconnectInterval);
+          this.reconnectInterval = null;
+        }
+        
+        this.connected = false;
+        console.log('Cliente MQTT Web detenido');
+      }
+
+      /**
+       * Obtiene la información actual del servidor
+       */
+      getServerInfo() {
+        return this.serverInfo;
+      }
+
+      /**
+       * Actualiza la configuración del cliente
+       */
+      updateConfig(newConfig) {
+        this.config = { ...this.config, ...newConfig };
+        console.log('Configuración actualizada:', this.config);
+      }
+    }
+
+    // Exportar para uso global
+    window.MqttWebClient = MqttWebClient;
+  </script>
+  
   <script>
     // Elementos DOM
     const startDateInput = document.getElementById('startDate');
@@ -423,9 +811,14 @@
     const generateReportBtn = document.getElementById('generateReportBtn');
     const exportExcelBtn = document.getElementById('exportExcelBtn');
     const printReportBtn = document.getElementById('printReportBtn');
+    const clearOrdersBtn = document.getElementById('clearOrdersBtn');
     const reportSummary = document.getElementById('reportSummary');
     const reportAlert = document.getElementById('reportAlert');
     const loading = document.querySelector('.loading');
+
+    // Cliente MQTT para descubrimiento automático del servidor
+    let mqttClient = null;
+    let serverInfo = null;
 
     // Establecer fechas predeterminadas (mes actual)
     const now = new Date();
@@ -437,6 +830,52 @@
 
     // Variable para almacenar datos del reporte actual
     let currentReportData = null;
+
+    // Función para inicializar el cliente MQTT
+    function initializeMqttClient() {
+      try {
+        console.log('🔧 Inicializando cliente MQTT...');
+        
+        if (window.MqttWebClient) {
+          mqttClient = new window.MqttWebClient();
+          
+          // Configurar callback para cuando se reciba información del servidor
+          mqttClient.onServerInfo((info) => {
+            serverInfo = info;
+            console.log('✅ Servidor descubierto automáticamente via MQTT:', info);
+            showAlert(`✅ Servidor encontrado automáticamente en ${info.ip}:${info.port}`, 'info');
+            
+            // Actualizar la URL base para las peticiones
+            updateApiBaseUrl(info);
+          });
+          
+          // Iniciar cliente MQTT
+          mqttClient.start().catch(error => {
+            console.error('❌ Error al iniciar cliente MQTT:', error);
+            showAlert('⚠️ No se pudo conectar al broker HiveMQ. Usando configuración manual.', 'warning');
+            // Usar configuración por defecto si MQTT falla
+            serverInfo = { ip: 'localhost', port: 3000 };
+            updateApiBaseUrl(serverInfo);
+          });
+        } else {
+          console.log('⚠️ Cliente MQTT no disponible, usando configuración manual');
+          showAlert('⚠️ Cliente MQTT no disponible. Usando configuración manual.', 'warning');
+          serverInfo = { ip: 'localhost', port: 3000 };
+          updateApiBaseUrl(serverInfo);
+        }
+      } catch (error) {
+        console.error('❌ Error al inicializar cliente MQTT:', error);
+        showAlert('⚠️ Error al inicializar MQTT. Usando configuración manual.', 'warning');
+        serverInfo = { ip: 'localhost', port: 3000 };
+        updateApiBaseUrl(serverInfo);
+      }
+    }
+
+    // Función para actualizar la URL base de la API
+    function updateApiBaseUrl(info) {
+      window.apiBaseUrl = `http://${info.ip}:${info.port}`;
+      console.log('URL base de API actualizada:', window.apiBaseUrl);
+    }
 
     // Función para mostrar alerta
     function showAlert(message, type = 'info') {
@@ -480,21 +919,24 @@
           params.append('product', productFilter.value);
         }
 
-        // URL absoluta a la API
-        const apiUrl = `http://localhost:3000/api/reports/sales?${params.toString()}`;
-        
-        // Para casos donde no haya API activa, generamos datos simulados para demostración
-        let result;
+        // URL dinámica a la API usando la información del servidor descubierto
+        const baseUrl = window.apiBaseUrl || 'http://localhost:3000';
+        const apiUrl = `${baseUrl}/api/reports/sales?${params.toString()}`;
         
         try {
           // Intentar hacer la petición real
           const response = await fetch(apiUrl);
-          result = await response.json();
-        } catch (networkError) {
-          console.log('Error de conexión con la API, usando datos simulados', networkError);
           
-          // Generar datos simulados para demostración
-          result = generateMockData(startDateInput.value, endDateInput.value, productFilter.value);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          result = await response.json();
+        } catch (error) {
+          console.error('Error al conectar con el servidor:', error);
+          showAlert('No se pudo conectar al servidor. Verifique que el servidor esté ejecutándose y accesible desde este dispositivo.', 'danger');
+          loading.style.display = 'none';
+          return;
         }
 
         // Ocultar loading
@@ -526,142 +968,7 @@
       }
     }
 
-    // Función para generar datos simulados cuando no hay conexión a la API
-    function generateMockData(startDate, endDate, productFilter) {
-      // Productos predefinidos por categoría
-      const productCategories = {
-        'miel': 'Miel de Abeja',
-        'cake': 'Cake',
-        'cirios': 'Cirios Litúrgicos',
-        'manjar': 'Manjar de Leche',
-        'propóleo': 'Propóleo',
-      };
 
-      // Productos disponibles para generar datos
-      let availableProducts = [
-        { name: 'Frasco de 500 ml', category: 'Miel de Abeja', price: 10.00, quantity: 12 },
-        { name: 'Frasco de 250 ml', category: 'Miel de Abeja', price: 6.00, quantity: 8 },
-        { name: 'De 260 gr', category: 'Cake', price: 3.00, quantity: 18 },
-        { name: 'De 500 gr', category: 'Cake', price: 5.50, quantity: 7 },
-        { name: 'De 12 cm - Color blanco', category: 'Cirios Litúrgicos', price: 4.25, quantity: 5 },
-        { name: 'De 20 cm - Color rojo', category: 'Cirios Litúrgicos', price: 6.75, quantity: 3 },
-        { name: 'Frasco de 200 gr', category: 'Manjar de Leche', price: 4.50, quantity: 9 },
-        { name: 'Gotero de 30 ml', category: 'Propóleo', price: 7.25, quantity: 6 }
-      ];
-
-      // Filtrar productos si se especifica una categoría
-      if (productFilter) {
-        const categoryName = productCategories[productFilter] || productFilter;
-        availableProducts = availableProducts.filter(p => 
-          p.category.toLowerCase().includes(categoryName.toLowerCase())
-        );
-      }
-
-      // Generar datos simulados para órdenes
-      const orders = [];
-      // Eliminar referencia a estados de pedido
-      
-      // Nombres y teléfonos de clientes para datos más realistas
-      const clientNames = [
-        "María Sánchez", "Juan Pérez", "Ana Torres", "Carlos Mendoza", 
-        "Sofía Carrillo", "Lucía Monteros", "Eduardo Vélez", "Patricia Aguirre",
-        "Fernando Palacios", "Rosa Guzmán"
-      ];
-      
-      for (let i = 1; i <= 10; i++) {
-        const orderDate = new Date(startDate);
-        // Distribuir fechas entre startDate y endDate
-        const range = (new Date(endDate) - new Date(startDate)) / 10;
-        orderDate.setTime(orderDate.getTime() + range * i);
-        
-        orders.push({
-          orderId: `MON-${orderDate.toISOString().substring(0, 10)}-${1000 + i}`,
-          clientName: clientNames[i-1],
-          clientPhone: `099${Math.floor(1000000 + Math.random() * 9000000)}`,
-          clientAddress: `Dirección Cliente ${i}`,
-          date: orderDate.toISOString(),
-          total: 0, // Se calcula después
-          items: []
-        });
-      }
-      
-      // Asignar productos aleatorios a cada orden
-      orders.forEach(order => {
-        // Entre 1 y 3 productos por orden
-        const numProducts = Math.floor(Math.random() * 3) + 1;
-        
-        for (let i = 0; i < numProducts; i++) {
-          const product = availableProducts[Math.floor(Math.random() * availableProducts.length)];
-          const quantity = Math.floor(Math.random() * 3) + 1;
-          
-          order.items.push({
-            nombre: product.name,
-            categoria: product.category,
-            cantidad: quantity,
-            precio: product.price
-          });
-          
-          order.total += product.price * quantity;
-        }
-      });
-      
-      // Preparar resumen de ventas
-      const products = [];
-      const productMap = new Map();
-      
-      // Acumular datos de productos vendidos
-      orders.forEach(order => {
-        order.items.forEach(item => {
-          const key = `${item.nombre} (${item.categoria})`;
-          
-          if (!productMap.has(key)) {
-            productMap.set(key, { 
-              name: key,
-              category: item.categoria,
-              quantity: 0,
-              total: 0
-            });
-          }
-          
-          const product = productMap.get(key);
-          product.quantity += item.cantidad;
-          product.total += item.precio * item.cantidad;
-        });
-      });
-      
-      // Convertir el mapa a array
-      productMap.forEach(product => products.push(product));
-      
-      // Ordenar productos por total de ventas (descendiente)
-      products.sort((a, b) => b.total - a.total);
-      
-      // Calcular totales
-      const totalOrders = orders.length;
-      const totalAmount = products.reduce((sum, p) => sum + p.total, 0);
-      
-      // Encontrar producto más vendido
-      let topProduct = { quantity: 0, name: 'Ninguno' };
-      products.forEach(p => {
-        if (p.quantity > topProduct.quantity) {
-          topProduct = p;
-        }
-      });
-      
-      return {
-        success: true,
-        data: {
-          summary: {
-            startDate: startDate,
-            endDate: endDate,
-            totalAmount: totalAmount,
-            totalOrders: totalOrders,
-            topProductName: topProduct.name
-          },
-          products: products,
-          orders: orders
-        }
-      };
-    }
 
     // Función para renderizar el reporte
     function renderReport(data) {
@@ -1005,9 +1312,43 @@
     generateReportBtn.addEventListener('click', generateReport);
     exportExcelBtn.addEventListener('click', exportToExcel);
     printReportBtn.addEventListener('click', printReport);
+    clearOrdersBtn.addEventListener('click', async () => {
+      if (confirm('¿Estás seguro de que quieres limpiar todas las órdenes? Esta acción no se puede deshacer.')) {
+        try {
+          const baseUrl = window.apiBaseUrl || 'http://localhost:3000';
+          const url = `${baseUrl}/api/orders/clear`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
 
-    // Iniciar con el reporte del mes actual
-    document.addEventListener('DOMContentLoaded', generateReport);
+          if (response.ok) {
+            showAlert('Órdenes limpiadas correctamente.', 'success');
+            // Recargar el reporte para reflejar el cambio
+            generateReport();
+          } else {
+            const errorData = await response.json();
+            showAlert(`Error al limpiar órdenes: ${errorData.message || response.statusText}`, 'danger');
+          }
+        } catch (error) {
+          console.error('Error al limpiar órdenes:', error);
+          showAlert('Error al intentar limpiar órdenes.', 'danger');
+        }
+      }
+    });
+
+    // Inicializar cliente MQTT y luego generar reporte
+    document.addEventListener('DOMContentLoaded', () => {
+      // Inicializar cliente MQTT para descubrimiento automático del servidor
+      initializeMqttClient();
+      
+      // Generar reporte después de un breve delay para permitir la conexión MQTT
+      setTimeout(() => {
+        generateReport();
+      }, 2000);
+    });
   </script>
 </body>
 </html>

@@ -1,60 +1,126 @@
-# WhatsApp Chatbot
+# Sistema de Chatbot WhatsApp con Reportes de Ventas
 
-This project is a simple chatbot implementation for WhatsApp using the `whatsapp-web.js` library. The structure of the project follows clean code principles, ensuring that each directory has a specific purpose and that the code is organized and maintainable.
+## Descripción
 
-## Project Structure
+Este proyecto implementa un chatbot de WhatsApp que gestiona pedidos y un sistema de reportes de ventas con descubrimiento automático de servidor usando MQTT con HiveMQ.
+
+## Características Principales
+
+- 🤖 **Chatbot de WhatsApp**: Gestiona pedidos automáticamente
+- 📊 **Reportes de Ventas**: Interfaz web para visualizar ventas
+- 🔍 **Descubrimiento Automático**: El servidor se descubre automáticamente via MQTT
+- 🌐 **Acceso Multi-dispositivo**: Funciona desde cualquier dispositivo en la red
+- 📱 **Responsive**: Interfaz adaptada para móviles y tablets
+
+## Configuración MQTT
+
+### Broker MQTT Online - HiveMQ
+
+El sistema utiliza HiveMQ como broker MQTT online, lo que elimina la necesidad de configurar un broker local:
+
+- **Cluster URL**: `147c3fd5edc245df89abcab67f04047b.s1.eu.hivemq.cloud`
+- **Puerto TLS**: `8883` (para el servidor)
+- **Puerto WebSocket**: `8884` (para el cliente web)
+
+### Ventajas de usar HiveMQ:
+
+1. **Sin configuración local**: No necesitas instalar Mosquitto
+2. **Acceso desde cualquier dispositivo**: Funciona desde teléfonos, tablets, etc.
+3. **Conexión segura**: Usa TLS/WSS para comunicación encriptada
+4. **Alta disponibilidad**: Servicio gestionado por HiveMQ
+5. **Escalabilidad**: Soporta múltiples conexiones simultáneas
+
+## Estructura del Proyecto
 
 ```
-whatsapp-chatbot
-├── src
-│   ├── config          # Configuration files
-│   │   └── environment.ts
-│   ├── core            # Core logic and types
-│   │   ├── client.ts
-│   │   └── types.ts
-│   ├── handlers        # Message handling logic
-│   │   └── messageHandler.ts
-│   ├── services        # Business logic for the chatbot
-│   │   └── botService.ts
-│   ├── utils           # Utility functions
-│   │   └── logger.ts
-│   └── app.ts         # Entry point of the application
-├── .env.example        # Environment variable template
-├── .gitignore          # Git ignore file
-├── package.json        # NPM configuration
-├── tsconfig.json       # TypeScript configuration
-└── README.md           # Project documentation
+chatbot_app/
+├── src/
+│   ├── api/              # Servidor web y APIs
+│   ├── config/           # Configuración
+│   ├── core/             # Lógica principal
+│   ├── handlers/         # Manejadores de comandos
+│   ├── services/         # Servicios de negocio
+│   ├── utils/            # Utilidades
+│   └── app.ts           # Punto de entrada
+├── assets/              # Imágenes y datos
+├── dist/               # Archivos compilados
+├── scripts/            # Scripts de build
+└── reportes_ventas.html # Interfaz de reportes
 ```
 
-## Setup Instructions
+## Instalación y Configuración
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd whatsapp-chatbot
-   ```
+### 1. Clonar el repositorio
+```bash
+git clone <repository-url>
+cd chatbot_app
+```
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### 2. Instalar dependencias
+```bash
+npm install
+```
 
-3. **Configure environment variables:**
-   - Copy the `.env.example` file to `.env` and fill in the required values.
+### 3. Configurar variables de entorno
+Crear archivo `.env`:
+```env
+PORT=3000
+```
 
-4. **Run the application:**
-   ```bash
-   npm start
-   ```
+### 4. Compilar y ejecutar
+```bash
+npm run build
+npm start
+```
 
-## Usage
+## Uso
 
-Once the application is running, it will connect to WhatsApp and start listening for incoming messages. You can customize the bot's responses by modifying the logic in `src/services/botService.ts` and `src/handlers/messageHandler.ts`.
+### Chatbot de WhatsApp
 
-## Contributing
+1. Ejecuta el servidor: `npm start`
+2. Escanea el código QR con WhatsApp
+3. El chatbot estará listo para recibir pedidos
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue for any suggestions or improvements.
+### Reportes de Ventas
 
-## License
+1. Abre `http://localhost:3000/reportes_ventas.html` en tu navegador
+2. El sistema detectará automáticamente el servidor via MQTT
+3. Selecciona fechas y genera reportes
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+### Acceso desde Otros Dispositivos
+
+**Con MQTT (Automático)**:
+- El sistema detecta automáticamente la IP del servidor
+- Funciona desde cualquier dispositivo en la misma red
+
+**Sin MQTT (Manual)**:
+- Encuentra la IP de tu PC: `ipconfig` (Windows)
+- Accede desde: `http://[IP-DE-TU-PC]:3000/reportes_ventas.html`
+
+## Flujo de Descubrimiento Automático
+
+1. **Servidor**: Detecta su IP real y la publica via MQTT a HiveMQ
+2. **Cliente Web**: Se conecta a HiveMQ y recibe la IP del servidor
+3. **Fallback**: Si MQTT falla, usa descubrimiento local
+4. **Último recurso**: Si todo falla, usa localhost:3000
+
+## API Endpoints
+
+- `GET /api/reports/sales` - Obtener reporte de ventas
+- `PUT /api/orders/:orderId/status` - Actualizar estado de pedido
+
+## Tecnologías Utilizadas
+
+- **Backend**: Node.js, TypeScript, Express
+- **MQTT**: HiveMQ (broker online)
+- **Frontend**: HTML, CSS, JavaScript
+- **WhatsApp**: whatsapp-web.js
+- **Logging**: Winston
+
+## Contribuir
+
+Las contribuciones son bienvenidas. Por favor, abre un issue o envía un pull request.
+
+## Licencia
+
+Este proyecto está bajo la Licencia MIT.

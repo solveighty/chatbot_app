@@ -9,7 +9,7 @@ export const WHATSAPP_CLIENT_OPTIONS = {
     },
 };
 
-export const PORT = process.env.PORT;
+export const PORT = process.env.PORT || '3000';
 
 export const config = {
     clientOptions: WHATSAPP_CLIENT_OPTIONS,

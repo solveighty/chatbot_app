@@ -27,11 +27,26 @@ function copyAssets(sourceDir, targetDir) {
     }
 }
 
+// Copia archivos JavaScript adicionales
+function copyAdditionalFiles() {
+    // Copiar el archivo HTML de reportes
+    const htmlSource = path.join(__dirname, '../reportes_ventas.html');
+    const htmlTarget = path.join(__dirname, '../dist/reportes_ventas.html');
+    
+    if (fs.existsSync(htmlSource)) {
+        fs.copyFileSync(htmlSource, htmlTarget);
+        console.log(`Copied: ${htmlSource} -> ${htmlTarget}`);
+    }
+}
+
 // Copiar archivos desde assets a dist/data
 const sourceDir = path.join(__dirname, '../assets');
 const targetDir = path.join(__dirname, '../dist/data');
 
 ensureDirectoryExistence(targetDir);
 copyAssets(sourceDir, targetDir);
+
+// Copiar archivos adicionales
+copyAdditionalFiles();
 
 console.log('All assets copied successfully!');

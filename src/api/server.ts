@@ -17,9 +17,12 @@ const { orderService } = initializeServices();
 app.use(routes);
 
 // Iniciar servidor
-export const startServer = () => {
-  app.listen(PORT, () => {
-    logger.info(`Servidor web iniciado en puerto ${PORT}`);
-    logger.info(`Interfaz de reportes disponible en: http://localhost:${PORT}`);
+export const startServer = (): Promise<number> => {
+  return new Promise((resolve) => {
+    const server = app.listen(PORT, () => {
+      logger.info(`Servidor web iniciado en puerto ${PORT}`);
+      logger.info(`Interfaz de reportes disponible en: http://localhost:${PORT}`);
+      resolve(Number(PORT) || 3000);
+    });
   });
 };

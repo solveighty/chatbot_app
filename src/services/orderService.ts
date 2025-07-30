@@ -9,11 +9,12 @@ import { getOrdersByProductLogic } from './logic/orderService/logic/getOrdersByP
 import { getOrdersByStatusLogic } from './logic/orderService/logic/getOrdersByStatus';
 import { generateSalesSummaryLogic } from './logic/orderService/logic/generateSalesSummary';
 
+
 export class OrderService {
   private ordersFilePath: string;
 
   constructor() {
-    this.ordersFilePath = path.resolve(process.cwd(), 'data', 'orders.json');
+    this.ordersFilePath = path.resolve(process.cwd(), 'dist/data', 'orders.json');
     this.initOrdersFile();
   }
 
@@ -28,7 +29,8 @@ export class OrderService {
    * Guardar un nuevo pedido
    */
   public saveOrder(order: OrderData): boolean {
-    return saveOrderLogic(this.ordersFilePath, order, () => this.getAllOrders());
+    const result = saveOrderLogic(this.ordersFilePath, order, () => this.getAllOrders());
+    return result;
   }
 
   /**
@@ -42,12 +44,13 @@ export class OrderService {
    * Actualizar estado de un pedido
    */
   public updateOrderStatus(orderId: string, status: 'pending' | 'completed' | 'cancelled'): boolean {
-    return updateOrderStatusLogic(
+    const result = updateOrderStatusLogic(
       this.ordersFilePath,
       orderId,
       status,
       () => this.getAllOrders()
     );
+    return result;
   }
 
   /**
@@ -80,5 +83,28 @@ export class OrderService {
   public generateSalesSummary(startDate: string, endDate: string, product?: string, status?: string) {
     const orders = this.getOrdersByDateRange(startDate, endDate);
     return generateSalesSummaryLogic(orders, startDate, endDate, product, status);
+  }
+
+  /**
+   * Limpiar todas las órdenes
+   */
+  public clearAllOrders(): boolean {
+    try {
+      const fs = require('fs');
+      const dir = path.dirname(this.ordersFilePath);
+      
+      // Asegurar que el directorio existe
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      
+      // Escribir un array vacío al archivo
+      fs.writeFileSync(this.ordersFilePath, JSON.stringify([], null, 2), 'utf8');
+      
+      return true;
+    } catch (error) {
+      console.error('Error al limpiar órdenes:', error);
+      return false;
+    }
   }
 }
