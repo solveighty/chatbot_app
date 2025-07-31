@@ -34,7 +34,7 @@ async function initializeServices() {
         // Iniciar servicio MQTT para comunicación local
         if (serverPort) {
             const mqttService = new MqttService(serverPort);
-            await mqttService.start();
+            mqttService.start();
             logger.info('Servicio MQTT iniciado correctamente');
         }
         

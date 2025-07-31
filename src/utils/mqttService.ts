@@ -30,7 +30,7 @@ export class MqttService {
     };
 
     this.serverInfo = {
-      ip: this.getLocalIP(),
+      ip: '127.0.0.1', // IP temporal, se actualizará en start()
       port: serverPort,
       timestamp: new Date().toISOString(),
       hostname: os.hostname()
@@ -38,33 +38,69 @@ export class MqttService {
   }
 
   /**
-   * Obtiene la dirección IP local del servidor
+   * Obtiene la dirección IP local del servidor usando interfaces de red preferidas
    */
   private getLocalIP(): string {
+    // Adaptadores preferidos (puedes agregar más si es necesario)
+    const preferredInterfaces = ['Wi-Fi', 'Ethernet', 'LAN inalámbrica', 'WiFi', 'Wireless LAN adapter'];
+    
+    // Obtener interfaces de red
     const interfaces = os.networkInterfaces();
     
-    for (const name of Object.keys(interfaces)) {
-      const networkInterface = interfaces[name];
-      if (networkInterface) {
-        for (const interface_ of networkInterface) {
-          // Ignorar interfaces que no sean IPv4 o que sean loopback
-          if (interface_.family === 'IPv4' && !interface_.internal) {
-            return interface_.address;
+    let ip: string | undefined;
+    
+    // Buscar en interfaces preferidas
+    for (const name of preferredInterfaces) {
+      const iface = interfaces[name];
+      if (iface) {
+        for (const alias of iface) {
+          if (alias.family === 'IPv4' && !alias.internal) {
+            ip = alias.address;
+            logger.info(`IP local detectada en ${name}: ${ip}`);
+            break;
           }
         }
       }
+      if (ip) break;
+    }
+    
+    // Si no se encuentra en interfaces preferidas, buscar en todas las interfaces
+    if (!ip) {
+      for (const name of Object.keys(interfaces)) {
+        const networkInterface = interfaces[name];
+        if (networkInterface) {
+          for (const interface_ of networkInterface) {
+            // Ignorar interfaces que no sean IPv4 o que sean loopback
+            if (interface_.family === 'IPv4' && !interface_.internal) {
+              ip = interface_.address;
+              logger.info(`IP local detectada en ${name}: ${ip}`);
+              break;
+            }
+          }
+        }
+        if (ip) break;
+      }
+    }
+    
+    if (ip) {
+      return ip;
     }
     
     // Fallback a localhost si no se encuentra una IP válida
+    logger.warn('No se pudo encontrar una IP válida, usando localhost');
     return '127.0.0.1';
   }
 
   /**
    * Inicia el servicio MQTT
    */
-  public async start(): Promise<void> {
+  public start(): void {
     try {
-      logger.info(`Iniciando servicio MQTT en ${this.config.broker}:${this.config.port}`);
+      // Obtener la IP local antes de iniciar
+      const localIP = this.getLocalIP();
+      this.serverInfo.ip = localIP;
+      
+      logger.info(`Iniciando servicio MQTT en ${this.config.broker}:${this.config.port} con IP: ${localIP}`);
       
       // Conectar al broker MQTT HiveMQ con TLS y credenciales
       this.client = mqtt.connect(`mqtts://${this.config.broker}:${this.config.port}`, {

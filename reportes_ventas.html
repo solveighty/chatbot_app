@@ -438,7 +438,7 @@
   <script>
          /**
       * Cliente MQTT para navegador que se conecta al broker HiveMQ online
-      * Usa WebSockets seguros (WSS) para la comunicación con el broker MQTT
+      * Usa MQTT sobre WebSocket (puerto 8884) para la comunicación con el broker MQTT
       * 
       * FLUJO DE DESCUBRIMIENTO AUTOMÁTICO:
       * 1. El servidor detecta su IP real y la publica via MQTT a HiveMQ
@@ -453,14 +453,14 @@
         this.serverInfo = null;
         this.onServerInfoCallback = null;
         this.reconnectInterval = null;
-        this.config = {
-          broker: '147c3fd5edc245df89abcab67f04047b.s1.eu.hivemq.cloud',
-          port: 8884, // Puerto WebSocket de HiveMQ
-          topic: 'monasterio/server-info',
-          clientId: `monasterio-web-client-${Date.now()}`,
-          username: 'monasterio',
-          password: 'Monasterio123'
-        };
+                 this.config = {
+           broker: '147c3fd5edc245df89abcab67f04047b.s1.eu.hivemq.cloud',
+           port: 8884, // Puerto WebSocket de HiveMQ (para navegador)
+           topic: 'monasterio/server-info',
+           clientId: `monasterio-web-client-${Date.now()}`,
+           username: 'web-api',
+           password: 'Web12345'
+         };
       }
 
       /**
@@ -476,8 +476,8 @@
             throw new Error('MQTT.js no está disponible en el navegador');
           }
           
-          // Probar conectividad WebSocket básica
-          await this.testWebSocketConnectivity();
+                     // Probar conectividad MQTT básica
+           await this.testMqttConnectivity();
           
           // Intentar conectar al broker MQTT
           await this.connect();
@@ -492,80 +492,85 @@
         }
       }
 
-      /**
-       * Prueba la conectividad WebSocket básica
-       */
-      async testWebSocketConnectivity() {
-        return new Promise((resolve, reject) => {
-          try {
-            const wsUrl = `wss://${this.config.broker}:${this.config.port}`;
-            console.log('🧪 Probando conectividad WebSocket a:', wsUrl);
-            
-            const testWs = new WebSocket(wsUrl);
-            
-            testWs.onopen = () => {
-              console.log('✅ Prueba de WebSocket exitosa');
-              testWs.close();
-              resolve();
-            };
-            
-            testWs.onerror = (error) => {
-              console.error('❌ Error en prueba de WebSocket:', error);
-              reject(new Error('No se puede conectar al WebSocket del broker'));
-            };
-            
-            testWs.onclose = () => {
-              console.log('🔌 Prueba de WebSocket cerrada');
-            };
-            
-            // Timeout de 10 segundos
-            setTimeout(() => {
-              if (testWs.readyState !== WebSocket.OPEN) {
-                testWs.close();
-                reject(new Error('Timeout en prueba de WebSocket'));
-              }
-            }, 10000);
-            
-          } catch (error) {
-            reject(error);
-          }
-        });
-      }
+             /**
+        * Prueba la conectividad MQTT básica
+        */
+       async testMqttConnectivity() {
+         return new Promise((resolve, reject) => {
+           try {
+             const wsUrl = `wss://${this.config.broker}:${this.config.port}/mqtt`;
+             console.log('🧪 Probando conectividad MQTT WebSocket a:', wsUrl);
+             
+             // Crear un cliente de prueba temporal
+             const testClient = window.mqtt.connect(wsUrl, {
+               clientId: `test-client-${Date.now()}`,
+               username: this.config.username,
+               password: this.config.password,
+               clean: true,
+               connectTimeout: 10000,
+               rejectUnauthorized: false
+             });
+             
+                            testClient.on('connect', () => {
+                 console.log('✅ Prueba de MQTT WebSocket exitosa');
+                 testClient.end();
+                 resolve();
+               });
+               
+               testClient.on('error', (error) => {
+                 console.error('❌ Error en prueba de MQTT WebSocket:', error);
+                 testClient.end();
+                 reject(new Error('No se puede conectar al broker MQTT'));
+               });
+               
+                               // Timeout de 20 segundos para dar más tiempo a la conexión
+                setTimeout(() => {
+                  if (!testClient.connected) {
+                    testClient.end();
+                    reject(new Error('Timeout en prueba de MQTT WebSocket'));
+                  }
+                }, 20000);
+             
+           } catch (error) {
+             reject(error);
+           }
+         });
+       }
 
-            /**
-       * Conecta al broker MQTT usando WebSockets
-       */
-      async connect() {
-        return new Promise((resolve, reject) => {
-          try {
-            // Usar MQTT.js para conectar al broker HiveMQ
-            const mqtt = window.mqtt;
-            if (!mqtt) {
-              reject(new Error('MQTT.js no está disponible'));
-              return;
-            }
+                   /**
+        * Conecta al broker MQTT usando WebSocket
+        */
+       async connect() {
+         return new Promise((resolve, reject) => {
+           try {
+             // Usar MQTT.js para conectar al broker HiveMQ
+             const mqtt = window.mqtt;
+             if (!mqtt) {
+               reject(new Error('MQTT.js no está disponible'));
+               return;
+             }
 
-            console.log('🔗 Intentando conectar a MQTT broker:', this.config.broker, 'puerto:', this.config.port);
-            
-            const wsUrl = `wss://${this.config.broker}:${this.config.port}`;
-            console.log('🌐 URL de conexión WebSocket:', wsUrl);
-            
-            // Configuración de conexión MQTT
-            const options = {
-              clientId: this.config.clientId,
-              username: this.config.username,
-              password: this.config.password,
-              clean: true,
-              reconnectPeriod: 5000,
-              connectTimeout: 30000,
-              rejectUnauthorized: false, // Para desarrollo
-              keepalive: 60,
-              protocolVersion: 4 // MQTT 3.1.1
-            };
-            
-            console.log('⚙️ Opciones de conexión:', options);
-            
-            this.client = mqtt.connect(wsUrl, options);
+             console.log('🔗 Intentando conectar a MQTT broker:', this.config.broker, 'puerto:', this.config.port);
+             
+             const wsUrl = `wss://${this.config.broker}:${this.config.port}/mqtt`;
+             console.log('🌐 URL de conexión MQTT WebSocket:', wsUrl);
+             
+             // Configuración de conexión MQTT
+             const options = {
+               clientId: this.config.clientId,
+               username: this.config.username,
+               password: this.config.password,
+               clean: true,
+               reconnectPeriod: 5000,
+               connectTimeout: 30000,
+               rejectUnauthorized: false, // Para desarrollo
+               keepalive: 60,
+               protocolVersion: 4 // MQTT 3.1.1
+             };
+             
+             console.log('⚙️ Opciones de conexión:', options);
+             
+             this.client = mqtt.connect(wsUrl, options);
 
             this.client.on('connect', () => {
               console.log('✅ Conectado al broker HiveMQ online');
@@ -670,19 +675,19 @@
         }, 10000); // Intentar cada 10 segundos
       }
 
-      /**
-       * Método de respaldo para descubrir el servidor localmente
-       */
-      fallbackToLocalDiscovery() {
-        console.log('Usando descubrimiento local de servidor...');
-        
-        // Intentar puertos comunes
-        const commonPorts = [3000, 3001, 8080, 8000, 5000];
-        const localIPs = this.getLocalIPs();
-        
-        // Probar conexiones de forma secuencial para evitar sobrecarga
-        this.testConnectionsSequentially(localIPs, commonPorts);
-      }
+             /**
+        * Método de respaldo para descubrir el servidor localmente
+        */
+       fallbackToLocalDiscovery() {
+         console.log('🔄 Usando descubrimiento local de servidor...');
+         
+         // IPs más probables para el servidor
+         const localIPs = ['192.168.1.222', 'localhost', '127.0.0.1'];
+         const commonPorts = [3000];
+         
+         // Probar conexiones de forma secuencial
+         this.testConnectionsSequentially(localIPs, commonPorts);
+       }
 
              /**
         * Obtiene las IPs locales del dispositivo (solo como fallback)
@@ -722,41 +727,48 @@
         }
       }
 
-      /**
-       * Prueba la conexión a un servidor específico
-       */
-      async testServerConnection(ip, port) {
-        try {
-          const url = `http://${ip}:${port}/api/reports/sales`;
-          const response = await fetch(url, { 
-            method: 'GET',
-            mode: 'no-cors' // Para evitar problemas de CORS
-          });
-          
-          if (response.status === 200 || response.type === 'opaque') {
-            console.log(`Servidor encontrado en ${ip}:${port}`);
-            
-            const serverInfo = {
-              ip: ip,
-              port: port,
-              timestamp: new Date().toISOString(),
-              hostname: ip
-            };
-            
-            this.serverInfo = serverInfo;
-            
-            if (this.onServerInfoCallback) {
-              this.onServerInfoCallback(serverInfo);
-            }
-            
-            return true;
-          }
-        } catch (error) {
-          // Silenciar errores de conexión
-        }
-        
-        return false;
-      }
+             /**
+        * Prueba la conexión a un servidor específico
+        */
+       async testServerConnection(ip, port) {
+         try {
+           const url = `http://${ip}:${port}/api/server-info`;
+           console.log(`🧪 Probando conexión a: ${url}`);
+           
+           const controller = new AbortController();
+           const timeoutId = setTimeout(() => controller.abort(), 2000);
+           
+           const response = await fetch(url, { 
+             method: 'GET',
+             signal: controller.signal
+           });
+           
+           clearTimeout(timeoutId);
+           
+           if (response.ok) {
+             const data = await response.json();
+             if (data.success && data.data) {
+               console.log(`✅ Servidor encontrado en ${ip}:${port}`);
+               
+               this.serverInfo = data.data;
+               
+               if (this.onServerInfoCallback) {
+                 this.onServerInfoCallback(data.data);
+               }
+               
+               return true;
+             }
+           }
+         } catch (error) {
+           if (error.name === 'AbortError') {
+             console.log(`⏰ Timeout al conectar a ${ip}:${port}`);
+           } else {
+             console.log(`❌ No se pudo conectar a ${ip}:${port} - ${error.message}`);
+           }
+         }
+         
+         return false;
+       }
 
       /**
        * Establece el callback para cuando se reciba información del servidor
@@ -831,45 +843,142 @@
     // Variable para almacenar datos del reporte actual
     let currentReportData = null;
 
-    // Función para inicializar el cliente MQTT
-    function initializeMqttClient() {
-      try {
-        console.log('🔧 Inicializando cliente MQTT...');
-        
-        if (window.MqttWebClient) {
-          mqttClient = new window.MqttWebClient();
-          
-          // Configurar callback para cuando se reciba información del servidor
-          mqttClient.onServerInfo((info) => {
-            serverInfo = info;
-            console.log('✅ Servidor descubierto automáticamente via MQTT:', info);
-            showAlert(`✅ Servidor encontrado automáticamente en ${info.ip}:${info.port}`, 'info');
+                   // Función para inicializar el cliente MQTT
+      function initializeMqttClient() {
+        return new Promise((resolve, reject) => {
+          try {
+            console.log('🔧 Inicializando cliente MQTT...');
             
-            // Actualizar la URL base para las peticiones
-            updateApiBaseUrl(info);
-          });
-          
-          // Iniciar cliente MQTT
-          mqttClient.start().catch(error => {
-            console.error('❌ Error al iniciar cliente MQTT:', error);
-            showAlert('⚠️ No se pudo conectar al broker HiveMQ. Usando configuración manual.', 'warning');
-            // Usar configuración por defecto si MQTT falla
-            serverInfo = { ip: 'localhost', port: 3000 };
-            updateApiBaseUrl(serverInfo);
-          });
-        } else {
-          console.log('⚠️ Cliente MQTT no disponible, usando configuración manual');
-          showAlert('⚠️ Cliente MQTT no disponible. Usando configuración manual.', 'warning');
-          serverInfo = { ip: 'localhost', port: 3000 };
-          updateApiBaseUrl(serverInfo);
-        }
-      } catch (error) {
-        console.error('❌ Error al inicializar cliente MQTT:', error);
-        showAlert('⚠️ Error al inicializar MQTT. Usando configuración manual.', 'warning');
-        serverInfo = { ip: 'localhost', port: 3000 };
-        updateApiBaseUrl(serverInfo);
+            if (window.MqttWebClient) {
+              mqttClient = new window.MqttWebClient();
+              
+              let resolved = false;
+              
+              // Configurar callback para cuando se reciba información del servidor
+              mqttClient.onServerInfo((info) => {
+                if (resolved) return; // Evitar múltiples resoluciones
+                
+                serverInfo = info;
+                console.log('✅ Servidor descubierto automáticamente via MQTT:', info);
+                showAlert(`✅ Servidor encontrado automáticamente en ${info.ip}:${info.port}`, 'info');
+                
+                // Actualizar la URL base para las peticiones
+                updateApiBaseUrl(info);
+                
+                // Resolver la promise cuando se reciba la información del servidor
+                resolved = true;
+                resolve();
+              });
+              
+              // Iniciar cliente MQTT con timeout
+              const timeout = setTimeout(() => {
+                if (!resolved) {
+                  console.log('⏰ Timeout esperando información del servidor via MQTT');
+                  reject(new Error('Timeout esperando información del servidor'));
+                }
+              }, 15000); // 15 segundos de timeout
+              
+              mqttClient.start().then(() => {
+                console.log('✅ Cliente MQTT iniciado, esperando información del servidor...');
+                // La promise se resolverá cuando se reciba la información del servidor
+              }).catch(error => {
+                if (!resolved) {
+                  clearTimeout(timeout);
+                  console.error('❌ Error al iniciar cliente MQTT:', error);
+                  reject(error);
+                }
+              });
+            } else {
+              console.log('⚠️ Cliente MQTT no disponible');
+              reject(new Error('Cliente MQTT no disponible'));
+            }
+          } catch (error) {
+            console.error('❌ Error al inicializar cliente MQTT:', error);
+            reject(error);
+          }
+        });
       }
-    }
+    
+         // Función para obtener IPs locales
+     function getLocalIPs() {
+       const ips = ['localhost', '127.0.0.1'];
+       
+       // Agregar IPs más probables primero
+       ips.push('192.168.1.222'); // IP específica del servidor
+       ips.push('192.168.1.1');   // Router común
+       ips.push('192.168.1.100'); // IP común
+       ips.push('192.168.1.200'); // IP común
+       
+       // Agregar algunas IPs adicionales del rango común
+       for (let i = 2; i <= 10; i++) {
+         ips.push(`192.168.1.${i}`);
+       }
+       
+       return ips;
+     }
+     
+           // Función para descubrir servidor local
+      async function discoverLocalServer() {
+        return new Promise((resolve, reject) => {
+          const localIPs = getLocalIPs();
+          console.log('🔍 IPs locales a probar:', localIPs);
+          
+          let testedIPs = 0;
+          const totalIPs = localIPs.length;
+          let found = false;
+          
+          const testIP = async (ip) => {
+            if (found) return; // Si ya encontramos el servidor, no seguir probando
+            
+            const testUrl = `http://${ip}:3000/api/server-info`;
+            console.log(`🧪 Probando conexión a: ${testUrl}`);
+            
+            try {
+              // Crear un timeout manual para fetch
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 segundos timeout
+              
+              const response = await fetch(testUrl, { 
+                method: 'GET',
+                signal: controller.signal
+              });
+              
+              clearTimeout(timeoutId);
+              
+              if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                  serverInfo = data.data;
+                  console.log('✅ Servidor encontrado en:', ip);
+                  updateApiBaseUrl(serverInfo);
+                  found = true;
+                  resolve();
+                  return;
+                }
+              }
+              
+              throw new Error(`HTTP ${response.status}`);
+            } catch (error) {
+              testedIPs++;
+              
+              if (error.name === 'AbortError') {
+                console.log(`⏰ Timeout al conectar a ${ip}:3000`);
+              } else {
+                console.log(`❌ No se pudo conectar a ${ip}:3000 - ${error.message}`);
+              }
+              
+              // Si probamos todas las IPs y ninguna funcionó
+              if (testedIPs === totalIPs && !found) {
+                console.log('⚠️ No se pudo encontrar el servidor en ninguna IP local');
+                reject(new Error('No se pudo encontrar el servidor'));
+              }
+            }
+          };
+          
+          // Probar todas las IPs en paralelo
+          localIPs.forEach(ip => testIP(ip));
+        });
+      }
 
     // Función para actualizar la URL base de la API
     function updateApiBaseUrl(info) {
@@ -1339,16 +1448,21 @@
       }
     });
 
-    // Inicializar cliente MQTT y luego generar reporte
-    document.addEventListener('DOMContentLoaded', () => {
-      // Inicializar cliente MQTT para descubrimiento automático del servidor
-      initializeMqttClient();
-      
-      // Generar reporte después de un breve delay para permitir la conexión MQTT
-      setTimeout(() => {
-        generateReport();
-      }, 2000);
-    });
+         // Inicializar cliente MQTT y luego generar reporte
+     document.addEventListener('DOMContentLoaded', () => {
+       // Inicializar cliente MQTT para descubrimiento automático del servidor
+       initializeMqttClient().then(() => {
+         // Solo generar reporte después de que MQTT se haya inicializado completamente
+         console.log('✅ MQTT inicializado, generando reporte...');
+         generateReport();
+       }).catch(() => {
+         // Si MQTT falla completamente, intentar descubrimiento local y luego generar reporte
+         console.log('⚠️ MQTT falló, usando descubrimiento local...');
+         discoverLocalServer().then(() => {
+           generateReport();
+         });
+       });
+     });
   </script>
 </body>
 </html>
