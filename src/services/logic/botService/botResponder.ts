@@ -46,8 +46,13 @@ export class BotResponder {
       return productPurchaseResponse;
     }
 
-    // Handle checkout - solo si el mensaje contiene "finalizar compra"
-    if (userMessageLower.includes('finalizar compra')) {
+    // Handle checkout - si el mensaje contiene "finalizar compra" o si el usuario está en estado de checkout
+    if (userMessageLower.includes('finalizar compra') || 
+        (state && (state.lastCategory === 'solicitar_nombre_checkout' || 
+                   state.lastCategory === 'solicitar_cedula_checkout' || 
+                   state.lastCategory === 'solicitar_telefono_checkout' || 
+                   state.lastCategory === 'solicitar_direccion_checkout' || 
+                   state.lastCategory === 'confirmacion_checkout'))) {
       const checkoutResponse = await this.checkoutHandler.handleCheckout(userId, message, state);
       if (checkoutResponse) {
         logger.info(`✅ Respuesta de CheckoutHandler: ${typeof checkoutResponse === 'string' ? checkoutResponse.substring(0, 100) + '...' : 'objeto'}`);
