@@ -1,10 +1,10 @@
 {
   "saludos": [
-    "🙏 ¡Bienvenido/a! ¿En qué puedo ayudarte hoy? Escribe *ver productos* para explorar nuestro catálogo o *ayuda* para más opciones.",
-    "🌿 ¡Hola! Es un gusto saludarte. Escribe *ver productos* para conocer nuestros productos artesanales o *ayuda* si necesitas orientación.",
-    "😊 ¡Qué alegría tenerte por aquí! Puedes escribir *ver productos* para ver lo que ofrecemos o *ayuda* para más detalles.",
-    "📦 ¡Saludos! Estoy aquí para asistirte. Usa *ver productos* para conocer nuestras creaciones o *ayuda* para saber cómo funciona todo.",
-    "🕊️ ¡Bendiciones! Si deseas ver nuestros productos, escribe *ver productos*. Para más información, puedes usar *ayuda*."
+    "🙏 ¡Bienvenido/a! ¿En qué puedo ayudarte hoy? Escribe *ver productos* para explorar nuestro catálogo o *ayuda* para más opciones, para  ver mas servicios escribe *ver servicios*",
+    "🌿 ¡Hola! Es un gusto saludarte. Escribe *ver productos* para conocer nuestros productos artesanales o *ayuda* si necesitas orientación, para  ver mas servicios escribe *ver servicios*",
+    "😊 ¡Qué alegría tenerte por aquí! Puedes escribir *ver productos* para ver lo que ofrecemos o *ayuda* para más detalles, para  ver mas servicios escribe *ver servicios* ",
+    "📦 ¡Saludos! Estoy aquí para asistirte. Usa *ver productos* para conocer nuestras creaciones o *ayuda* para saber cómo funciona todo, para  ver mas servicios escribe *ver servicios*",
+    "🕊️ ¡Bendiciones! Si deseas ver nuestros productos, escribe *ver productos*. Para más información, puedes usar *ayuda*, para  ver mas servicios escribe *ver servicios*"
   ],
   "despedidas": [
     "🙏 ¡Gracias por tu mensaje! Que tengas un día lleno de bendiciones.",

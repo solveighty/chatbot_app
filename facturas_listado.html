@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listado de Facturas - Monasterio</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #607D8B;
+      --primary-dark: #455A64;
+      --accent: #8D6E63;
+      --light: #ECEFF1;
+      --dark: #37474F;
+      --success: #43A047;
+      --danger: #E53935;
+      --info: #039BE5;
+    }
+    body {
+      background-color: var(--light);
+      color: var(--dark);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .logo {
+      height: 60px;
+      margin-bottom: 10px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: var(--primary);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: var(--primary);
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    .btn-download {
+      background-color: var(--success);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.3s;
+    }
+    .btn-download:hover {
+      background-color: #388E3C;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 30px;
+      color: #777;
+      font-size: 14px;
+      border-top: 1px solid #eee;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      th, td {
+        padding: 8px 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://cdn-icons-png.flaticon.com/512/5778/5778437.png" alt="Logo" class="logo">
+    <h1>Listado de Facturas</h1>
+    <p class="subtitle">Monasterio Trapense</p>
+  </div>
+  <div class="container">
+    <h2>Facturas Generadas</h2>
+    <div id="facturasTableContainer">
+      <p>Cargando listado de facturas...</p>
+    </div>
+  </div>
+  <div class="footer">
+    &copy; 2025 Monasterio Trapense. Todos los derechos reservados.
+  </div>
+  <!-- Incluir SheetJS para compatibilidad de iconos (opcional, no se usa aquí pero mantiene consistencia) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Incluir MQTT.js para comunicación MQTT -->
+  <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+  <script>
+    // Copiado y adaptado de reportes_ventas.html
+    class MqttWebClient {
+      constructor() {
+        this.client = null;
+        this.connected = false;
+        this.serverInfo = null;
+        this.onServerInfoCallback = null;
+        this.reconnectInterval = null;
+        this.config = {
+          broker: '147c3fd5edc245df89abcab67f04047b.s1.eu.hivemq.cloud',
+          port: 8884,
+          topic: 'monasterio/server-info',
+          clientId: `monasterio-web-client-${Date.now()}`,
+          username: 'web-api',
+          password: 'Web12345'
+        };
+      }
+      async start() {
+        try {
+          if (!window.mqtt) throw new Error('MQTT.js no está disponible en el navegador');
+          await this.testMqttConnectivity();
+          await this.connect();
+          this.setupReconnection();
+        } catch (error) {
+          this.fallbackToLocalDiscovery();
+        }
+      }
+      async testMqttConnectivity() {
+        return new Promise((resolve, reject) => {
+          try {
+            const wsUrl = `wss://${this.config.broker}:${this.config.port}/mqtt`;
+            const testClient = window.mqtt.connect(wsUrl, {
+              clientId: `test-client-${Date.now()}`,
+              username: this.config.username,
+              password: this.config.password,
+              clean: true,
+              connectTimeout: 10000,
+              rejectUnauthorized: false
+            });
+            testClient.on('connect', () => { testClient.end(); resolve(); });
+            testClient.on('error', (error) => { testClient.end(); reject(new Error('No se puede conectar al broker MQTT')); });
+            setTimeout(() => { if (!testClient.connected) { testClient.end(); reject(new Error('Timeout en prueba de MQTT WebSocket')); } }, 20000);
+          } catch (error) { reject(error); }
+        });
+      }
+      async connect() {
+        return new Promise((resolve, reject) => {
+          try {
+            const mqtt = window.mqtt;
+            if (!mqtt) { reject(new Error('MQTT.js no está disponible')); return; }
+            const wsUrl = `wss://${this.config.broker}:${this.config.port}/mqtt`;
+            const options = {
+              clientId: this.config.clientId,
+              username: this.config.username,
+              password: this.config.password,
+              clean: true,
+              reconnectPeriod: 5000,
+              connectTimeout: 30000,
+              rejectUnauthorized: false,
+              keepalive: 60,
+              protocolVersion: 4
+            };
+            this.client = mqtt.connect(wsUrl, options);
+            this.client.on('connect', () => { this.connected = true; this.subscribeToServerInfo(); resolve(); });
+            this.client.on('message', (topic, message) => { this.handleMessage(topic, message.toString()); });
+            this.client.on('error', (error) => { reject(error); });
+            this.client.on('close', () => { this.connected = false; });
+            this.client.on('reconnect', () => {});
+            this.client.on('offline', () => { this.connected = false; });
+          } catch (error) { reject(error); }
+        });
+      }
+      subscribeToServerInfo() {
+        if (!this.connected || !this.client) return;
+        this.client.subscribe(this.config.topic, { qos: 1 }, (error) => {});
+      }
+      handleMessage(topic, message) {
+        try {
+          if (topic === this.config.topic) {
+            const serverInfo = JSON.parse(message);
+            this.serverInfo = serverInfo;
+            if (this.onServerInfoCallback) this.onServerInfoCallback(serverInfo);
+          }
+        } catch (error) {}
+      }
+      setupReconnection() {
+        this.reconnectInterval = setInterval(() => {
+          if (!this.connected) {
+            this.connect().catch(() => { this.fallbackToLocalDiscovery(); });
+          }
+        }, 10000);
+      }
+      fallbackToLocalDiscovery() {
+        const localIPs = ['192.168.1.222', 'localhost', '127.0.0.1'];
+        const commonPorts = [3000];
+        this.testConnectionsSequentially(localIPs, commonPorts);
+      }
+      async testConnectionsSequentially(ips, ports) {
+        for (const ip of ips) {
+          for (const port of ports) {
+            const found = await this.testServerConnection(ip, port);
+            if (found) return;
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        const defaultInfo = { ip: 'localhost', port: 3000 };
+        this.serverInfo = defaultInfo;
+        if (this.onServerInfoCallback) this.onServerInfoCallback(defaultInfo);
+      }
+      async testServerConnection(ip, port) {
+        try {
+          const url = `http://${ip}:${port}/api/server-info`;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2000);
+          const response = await fetch(url, { method: 'GET', signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data) {
+              this.serverInfo = data.data;
+              if (this.onServerInfoCallback) this.onServerInfoCallback(data.data);
+              return true;
+            }
+          }
+        } catch (error) {}
+        return false;
+      }
+      onServerInfo(callback) { this.onServerInfoCallback = callback; }
+      stop() {
+        if (this.client) { this.client.end(); this.client = null; }
+        if (this.reconnectInterval) { clearInterval(this.reconnectInterval); this.reconnectInterval = null; }
+        this.connected = false;
+      }
+      getServerInfo() { return this.serverInfo; }
+      updateConfig(newConfig) { this.config = { ...this.config, ...newConfig }; }
+    }
+    window.MqttWebClient = MqttWebClient;
+  </script>
+  <script>
+    let mqttClient = null;
+    let serverInfo = null;
+    function updateApiBaseUrl(info) {
+      window.apiBaseUrl = `http://${info.ip}:${info.port}`;
+    }
+    function showAlert(message, type = 'info') {
+      const container = document.getElementById('facturasTableContainer');
+      container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+    }
+    async function fetchFacturas() {
+      const baseUrl = window.apiBaseUrl || 'http://localhost:3000';
+      const apiUrl = `${baseUrl}/api/facturas/list`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('No se pudo obtener la lista de facturas');
+        const result = await response.json();
+        if (!result.success) throw new Error('Error en la respuesta de la API');
+        renderFacturasTable(result.files);
+      } catch (error) {
+        showAlert('No se pudo conectar al servidor o no hay facturas disponibles.', 'danger');
+      }
+    }
+    function renderFacturasTable(facturas) {
+      if (!facturas || facturas.length === 0) {
+        showAlert('No hay facturas generadas.', 'info');
+        return;
+      }
+      let html = `<table><thead><tr><th>Nombre de Factura</th><th>Descargar</th></tr></thead><tbody>`;
+      facturas.forEach(factura => {
+        html += `<tr><td>${factura}</td><td><a class="btn-download" href="./temp/${factura}" download><i class="fas fa-file-pdf"></i> Descargar</a></td></tr>`;
+      });
+      html += `</tbody></table>`;
+      document.getElementById('facturasTableContainer').innerHTML = html;
+    }
+    function initializeMqttClient() {
+      return new Promise((resolve, reject) => {
+        try {
+          if (window.MqttWebClient) {
+            mqttClient = new window.MqttWebClient();
+            let resolved = false;
+            mqttClient.onServerInfo((info) => {
+              if (resolved) return;
+              serverInfo = info;
+              updateApiBaseUrl(info);
+              resolved = true;
+              resolve();
+            });
+            const timeout = setTimeout(() => { if (!resolved) reject(new Error('Timeout esperando información del servidor')); }, 15000);
+            mqttClient.start().then(() => {}).catch(error => { if (!resolved) { clearTimeout(timeout); reject(error); } });
+          } else {
+            reject(new Error('Cliente MQTT no disponible'));
+          }
+        } catch (error) { reject(error); }
+      });
+    }
+    function getLocalIPs() {
+      const ips = ['localhost', '127.0.0.1', '192.168.1.222', '192.168.1.1', '192.168.1.100', '192.168.1.200'];
+      for (let i = 2; i <= 10; i++) { ips.push(`192.168.1.${i}`); }
+      return ips;
+    }
+    async function discoverLocalServer() {
+      return new Promise((resolve, reject) => {
+        const localIPs = getLocalIPs();
+        let testedIPs = 0;
+        const totalIPs = localIPs.length;
+        let found = false;
+        const testIP = async (ip) => {
+          if (found) return;
+          const testUrl = `http://${ip}:3000/api/server-info`;
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const response = await fetch(testUrl, { method: 'GET', signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.data) {
+                serverInfo = data.data;
+                updateApiBaseUrl(serverInfo);
+                found = true;
+                resolve();
+                return;
+              }
+            }
+            throw new Error(`HTTP ${response.status}`);
+          } catch (error) {
+            testedIPs++;
+            if (testedIPs === totalIPs && !found) reject(new Error('No se pudo encontrar el servidor'));
+          }
+        };
+        localIPs.forEach(ip => testIP(ip));
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeMqttClient().then(() => {
+        fetchFacturas();
+      }).catch(() => {
+        discoverLocalServer().then(() => {
+          fetchFacturas();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

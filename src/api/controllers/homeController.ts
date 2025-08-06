@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import path from 'path';
 import os from 'os';
+import fs from 'fs';
 
 export const serveHomePage = (req: Request, res: Response) => {
     const indexPath = path.join(process.cwd(), 'dist', 'reportes_ventas.html');
@@ -62,5 +63,17 @@ export const getServerInfo = (req: Request, res: Response) => {
             success: false,
             message: 'Error al obtener información del servidor'
         });
+    }
+};
+
+// Endpoint para listar facturas PDF en la carpeta temp
+export const listFacturas = (req: Request, res: Response) => {
+    try {
+        const tempDir = path.join(process.cwd(), 'temp');
+        const files = fs.readdirSync(tempDir);
+        const pdfs = files.filter(f => f.endsWith('.pdf'));
+        res.json({ success: true, files: pdfs });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error al listar facturas' });
     }
 };

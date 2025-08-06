@@ -1157,6 +1157,7 @@
               <th>Nº Pedido</th>
               <th>Fecha</th>
               <th>Cliente</th>
+              <th>Cédula</th>
               <th>Teléfono</th>
               <th>Total</th>
               <th>Acciones</th>
@@ -1172,6 +1173,7 @@
             <td>${order.orderId}</td>
             <td>${new Date(order.date).toLocaleString()}</td>
             <td>${order.clientName}</td>
+            <td>${order.cedula || ''}</td>
             <td>${order.clientPhone}</td>
             <td class="text-right">${formatCurrency(order.total)}</td>
             <td>
@@ -1338,7 +1340,7 @@
         // Crear hoja de pedidos si hay datos
         if (orders && orders.length > 0) {
           const ordersData = [
-            ['Nº Pedido', 'Fecha', 'Cliente', 'Teléfono', 'Total']
+            ['Nº Pedido', 'Fecha', 'Cliente', 'Teléfono', 'Cedula', 'Total']
           ];
 
           orders.forEach(order => {
@@ -1347,6 +1349,7 @@
               new Date(order.date).toLocaleString(),
               order.clientName,
               order.clientPhone,
+              order.cedula,
               order.total
             ]);
           });
@@ -1373,6 +1376,7 @@
                 ['Nº Pedido:', order.orderId],
                 ['Cliente:', order.clientName],
                 ['Teléfono:', order.clientPhone],
+                ['Cedula:', order.cedula],
                 ['Fecha:', new Date(order.date).toLocaleString()],
                 [''],
                 ['PRODUCTOS'],
