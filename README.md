@@ -12,7 +12,8 @@ Sistema completo de gestión de pedidos para el Monasterio Trapense que incluye 
 - **Carrito de compras** con gestión de cantidades
 - **Validación de datos del cliente** (nombre, dirección, teléfono)
 - **Generación automática de facturas PDF** profesionales
-- **Procesamiento de imágenes** de productos
+- **Procesamiento de imágenes** de productos y servicios
+- **Consulta de servicios por ID** (los servicios se muestran y consultan con su ID)
 
 ### 📊 **Sistema de Reportes Avanzado**
 - **Reportes de ventas** en tiempo real
@@ -20,6 +21,7 @@ Sistema completo de gestión de pedidos para el Monasterio Trapense que incluye 
 - **Gráficos interactivos** de rendimiento
 - **Descubrimiento automático de servidor** via MQTT
 - **Interfaz responsive** para móviles y tablets
+- **No incluye consultas de servicios ni hospedaje** (el reporte solo muestra ventas)
 
 ### 🎨 **Generador de Facturas PDF Profesional**
 - **Diseño moderno y elegante** con paleta de colores profesional
@@ -145,7 +147,7 @@ npm start
 - `hola` - Saludo inicial y menú principal
 - `ayuda` - Muestra comandos disponibles
 - `productos` - Lista todas las categorías
-- `servicios` - Lista todos los servicios del monasterio
+- `servicios` - Lista todos los servicios del monasterio (con ID)
 - `carrito` - Muestra el carrito actual
 - `limpiar` - Vacía el carrito
 
@@ -157,12 +159,19 @@ npm start
 - `5` - Productos ecológicos
 
 #### **Servicios del Monasterio:**
-- `servicios` - Ver todos los servicios disponibles
+- `servicios` - Ver todos los servicios disponibles (con ID)
+- `25` - Consulta directa del servicio con ID 25 (por ejemplo, Habitación Individual)
 - `hospedaje` - Información sobre hospedaje
 - `alojamiento` - Información sobre alojamiento
 
+#### **Imágenes de Productos y Servicios:**
+- `ver imágenes` o `ver imagenes` - Muestra el menú de imágenes
+- `ver imagen 1.2` - Muestra la imagen del producto con código 1.2
+- `ver imagen 25` - Muestra la imagen del servicio con ID 25
+- `ver imagen [nombre]` - Muestra la imagen de un producto o servicio por nombre
+
 #### **Contacto con Hermanas:**
-- `quiero contactar con una hermana` - Horarios de contacto
+- `quiero contactar con una hermana` - Horarios de contacto (leídos dinámicamente del JSON)
 - `quiero llamar a una hermana` - Horarios de contacto
 - `contactar hermana` - Horarios de contacto
 - `llamar hermana` - Horarios de contacto
@@ -188,19 +197,8 @@ npm start
 
 ### 📊 **Sistema de Reportes**
 
-#### **Acceso Local:**
-1. Abre `reportes_ventas.html` en tu navegador
-2. El sistema detectará automáticamente el servidor
-
-#### **Acceso desde Otros Dispositivos:**
-1. Encuentra la IP de tu PC: `ipconfig` (Windows) o `ifconfig` (Mac/Linux)
-2. Accede desde: `http://[IP-DE-TU-PC]:3000/reportes_ventas.html`
-
-#### **Funcionalidades:**
-- **Filtros por fecha** - Selecciona rangos específicos
-- **Filtros por producto** - Analiza productos específicos
-- **Filtros por estado** - Ver pedidos pendientes, completados, etc.
-- **Exportación** - Descarga reportes en diferentes formatos
+- El reporte de ventas solo muestra ventas y productos, ya no incluye consultas de servicios ni solicitudes de hospedaje.
+- Exportación a Excel y filtros avanzados siguen disponibles.
 
 ### 🎨 **Personalización de Facturas**
 
@@ -236,92 +234,10 @@ qrCode: {
 }
 ```
 
-## 🔧 Configuración Avanzada
-
-### **MQTT (Descubrimiento Automático)**
-
-El sistema usa HiveMQ para descubrimiento automático:
-- **Puerto TLS**: `8883` (servidor)
-- **Puerto WebSocket**: `8884` (cliente web)
-
-### **Logging**
-
-Configuración de logs en `src/utils/logger.ts`:
-- **Nivel**: `info`, `warn`, `error`, `debug`
-- **Archivos**: Se guardan en `logs/`
-- **Rotación**: Automática por fecha
-
-### **Productos**
-
-Edita `assets/products.json` para modificar el catálogo:
-```json
-{
-  "categoria": "Panadería",
-  "productos": [
-    {
-      "id": 1,
-      "nombre": "Pan Integral",
-      "precio": 2.50,
-      "descripcion": "Pan integral fresco",
-      "imagen": "pan-integral.jpg"
-    }
-  ]
-}
-```
-
-### **Configurar Servicios**
-
-Edita `assets/services.json` para modificar los servicios:
-
-```json
-{
-  "categoria": "Hospedaje",
-  "tipo": "servicio",
-  "descripcion": "Servicios de hospedaje en el monasterio",
-  "productos": [
-    {
-      "nombre": "Habitación Individual",
-      "descripcion": "Habitación privada con baño incluido",
-      "precio": 25.0,
-      "imagen": "images/hospedaje-individual.jpg",
-      "contacto": {
-        "telefono": "0999946157",
-        "mensaje": "Para reservar habitación individual, contacta directamente al WhatsApp: 0999946157"
-      }
-    }
-  ]
-}
-```
-
 ### **Configurar Horarios de Contacto**
 
-Edita `assets/contact-hours.json` para modificar los horarios:
-
-```json
-{
-  "horarios": {
-    "lunes": {
-      "disponible": true,
-      "hora_inicio": "08:00",
-      "hora_fin": "17:00",
-      "descripcion": "Horario de atención normal"
-    }
-  },
-  "contacto": {
-    "telefono": "0999946157",
-    "whatsapp": "0999946157",
-    "mensaje_principal": "Para contactar con una hermana del monasterio...",
-    "mensaje_emergencia": "En caso de emergencia...",
-    "notas": [
-      "Los horarios pueden variar en días festivos"
-    ]
-  },
-  "comandos_contacto": [
-    "quiero contactar con una hermana",
-    "quiero llamar a una hermana"
-  ]
-}
-```
+- Los horarios de contacto se leen de `assets/contact-hours.json` y se muestran por día/franja.
+- Puedes personalizar los días, franjas y mensajes desde el JSON.
 
 ## 🛠️ Scripts Disponibles
 
