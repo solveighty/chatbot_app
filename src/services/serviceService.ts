@@ -29,6 +29,7 @@ interface ContactHours {
     hora_inicio: string;
     hora_fin: string;
     descripcion: string;
+    disponible: boolean; // Added disponible property
   }[];
   contacto: {
     telefono: string;
@@ -187,7 +188,7 @@ export class ServiceService implements IServiceService {
       message += `   ${category.descripcion}\n\n`;
 
       category.productos.forEach((service: ServiceProduct) => {
-        message += `   ${service.id}. ${service.nombre}\n`;
+        message += `   ${service.id}. ${service.nombre} (ID: ${service.id})\n`;
         message += `      ${service.descripcion}\n`;
         message += `      📞 Contacto: ${service.contacto.telefono}\n\n`;
       });
@@ -226,9 +227,16 @@ export class ServiceService implements IServiceService {
     }
 
     let message = "📞 *Horarios de Contacto:*\n\n";
-    this.contactHours.horarios.forEach((horario: any) => {
-      message += `*${horario.dia}:* ${horario.hora_inicio} - ${horario.hora_fin} (${horario.descripcion})\n`;
-    });
+    // Adaptar a la nueva estructura: horarios es un objeto, no un array
+    const horariosObj = this.contactHours.horarios;
+    for (const key in horariosObj) {
+      if (horariosObj.hasOwnProperty(key)) {
+        const horario = horariosObj[key];
+        if (horario.disponible) {
+          message += `*${key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}:* ${horario.hora_inicio} - ${horario.hora_fin} (${horario.descripcion})\n`;
+        }
+      }
+    }
 
     message += `\n*Contacto Principal:*\n`;
     message += `WhatsApp: ${this.contactHours.contacto.whatsapp}\n`;

@@ -34,6 +34,20 @@ export async function processImageRequest(
     }
   }
 
+  // Refuerzo robusto: si el mensaje es cualquier variante de 'ver imágenes' o 'ver imagenes', mostrar el menú principal
+  const mensajeNormalizado = commandLower
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // quita tildes
+    .toLowerCase()
+    .replace(/\s+/g, ' ') // unifica espacios
+    .trim();
+  if (mensajeNormalizado === 'ver imagenes') {
+    return {
+      response: productService.generarMenuImagenesNumerado(),
+      stateUpdates: { lastCategory: 'menu_imagenes', timestamp: new Date() }
+    };
+  }
+
   // Si no hay código específico, mostrar el menú principal de imágenes
   return {
     response: productService.generarMenuImagenesNumerado(),

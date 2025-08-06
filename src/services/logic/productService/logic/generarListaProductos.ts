@@ -14,7 +14,7 @@ export function generarListaProductosLogic(
       const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
 
       if (producto.variantes && producto.variantes.length > 0) {
-        mensaje += `- ${producto.nombre}: $${precioFormateado}\n`;
+        mensaje += `- ${producto.nombre} (ID: ${producto.id}): $${precioFormateado}\n`;
 
         producto.variantes.forEach((variante) => {
           const precioVarianteFormateado = variante.precio
@@ -26,7 +26,7 @@ export function generarListaProductosLogic(
         const primerVariante = producto.variantes[0];
         mensaje += `  → Para ordenar: "quiero comprar ${producto.nombre} ${primerVariante.nombre}"\n`;
       } else {
-        mensaje += `- ${producto.nombre}: $${precioFormateado}\n`;
+        mensaje += `- ${producto.nombre} (ID: ${producto.id}): $${precioFormateado}\n`;
       }
     });
     mensaje += "\n";

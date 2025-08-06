@@ -39,7 +39,25 @@ export class ImageHandler {
         }
       } else if (servicio) {
         this.stateManager.updateState(userId, { lastCategory: 'imagen_servicio' });
-        return `🏛 *${servicio.nombre}*\n\n${servicio.contacto.mensaje}`;
+        if (servicio.imagen) {
+          const path = require('path');
+          const fs = require('fs');
+          const { MessageMedia } = require('whatsapp-web.js');
+          // Buscar la imagen en la ruta relativa a assets/images
+          let mediaPath = path.resolve(process.cwd(), 'assets', servicio.imagen);
+          if (!fs.existsSync(mediaPath)) {
+            // Intentar también en dist/data por compatibilidad
+            mediaPath = path.resolve(process.cwd(), 'dist/data', servicio.imagen);
+          }
+          if (fs.existsSync(mediaPath)) {
+            const media = MessageMedia.fromFilePath(mediaPath);
+            return {
+              text: `🏛️ *${servicio.nombre}*\n\n${servicio.descripcion}\n\n📱 *Contacto:* ${servicio.contacto.telefono}\n\n${servicio.contacto.mensaje}`,
+              media
+            };
+          }
+        }
+        return `🏛️ *${servicio.nombre}*\n\n${servicio.descripcion}\n\n📱 *Contacto:* ${servicio.contacto.telefono}\n\n${servicio.contacto.mensaje}`;
       } else {
         return `❌ No se encontró un producto o servicio con el ID *${code}*.`;
       }
@@ -60,11 +78,12 @@ export class ImageHandler {
     
     // Remove image-related words to get the category name
     const categoryName = userMessageLower
-      .replace(/ver imagen|imagen de|fotos|foto/gi, '')
+      .replace(/ver imágenes|ver imagenes|ver imagen|imagen de|fotos|foto/gi, '')
       .trim();
 
     if (!categoryName) {
-      return "❌ Por favor, especifica una categoría. Ejemplo: *ver imagen miel* o *ver imagen hospedaje*";
+      // Mostrar el menú de imágenes si no se especifica categoría
+      return await this.handleImageMenuRequest();
     }
 
     // Check product categories with common terms mapping

@@ -8,8 +8,8 @@ export function processNumericCode(
 ): CommandResult {
   const codigoNum = parseInt(code);
   
-  // Verificar si es un servicio (15-17)
-  if (serviceService && codigoNum >= 15 && codigoNum <= 17) {
+  // Verificar si es un servicio (cualquier ID válido)
+  if (serviceService) {
     const service = serviceService.getServiceById(codigoNum);
     if (service) {
       return {

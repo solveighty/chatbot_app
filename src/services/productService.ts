@@ -69,8 +69,10 @@ export class ProductService implements IProductService {
     this.productos.forEach((categoria) => {
       const emoji = this.getEmojiForCategory(categoria.categoria);
       mensaje += `${emoji} *${categoria.categoria}*\n`;
-      categoria.productos.forEach((producto) => {
-        mensaje += `- ${producto.nombre}: $${producto.precio?.toFixed(2)}\n`;
+      // Ordenar productos por id antes de mostrarlos
+      const productosOrdenados = [...categoria.productos].sort((a, b) => a.id - b.id);
+      productosOrdenados.forEach((producto) => {
+        mensaje += `${producto.id}- ${producto.nombre}: $${producto.precio?.toFixed(2)}\n`;
         if (producto.variantes && producto.variantes.length > 0) {
           producto.variantes.forEach((variante) => {
             mensaje += `  • ${variante.nombre}: $${variante.precio.toFixed(2)}\n`;

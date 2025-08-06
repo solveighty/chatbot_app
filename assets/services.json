@@ -5,7 +5,7 @@
     "descripcion": "Servicios de hospedaje en el monasterio",
     "productos": [
       {
-        "id": 15,
+        "id": 25,
         "nombre": "Habitación Individual",
         "descripcion": "Habitación privada con baño incluido",
         "imagen": "images/hospedaje-individual.jpg",
@@ -15,7 +15,7 @@
         }
       },
       {
-        "id": 16,
+        "id": 26,
         "nombre": "Retiro Espiritual",
         "descripcion": "Incluye hospedaje, alimentación y actividades espirituales",
         "imagen": "images/retiro-espiritual.jpg",
@@ -32,7 +32,7 @@
     "descripcion": "Servicios de encuadernación artesanal y restauración",
     "productos": [
       {
-        "id": 17,
+        "id": 27,
         "nombre": "Encuadernación Artesanal",
         "descripcion": "Encuadernación artesanal con materiales especiales y acabados finos",
         "imagen": "images/encuadernacion-artesanal.jpg",

@@ -24,7 +24,7 @@ export function generarListaProductosCategoriaLogic(
     const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
 
     if (producto.variantes && producto.variantes.length > 0) {
-      mensaje += `- ${prodNumber} ${producto.nombre}: $${precioFormateado}\n`;
+      mensaje += `- ${prodNumber} ${producto.nombre} (ID: ${producto.id}): $${precioFormateado}\n`;
 
       producto.variantes.forEach((variante, varIndex) => {
         const varNumber = `${prodNumber}.${varIndex + 1}`;
@@ -34,7 +34,7 @@ export function generarListaProductosCategoriaLogic(
         mensaje += `  • ${varNumber} ${variante.nombre}: $${precioVarianteFormateado}\n`;
       });
     } else {
-      mensaje += `- ${prodNumber} ${producto.nombre}: $${precioFormateado}\n`;
+      mensaje += `- ${prodNumber} ${producto.nombre} (ID: ${producto.id}): $${precioFormateado}\n`;
     }
   });
 
