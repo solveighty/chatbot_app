@@ -1,15 +1,19 @@
-import { Message, MessageMedia } from 'whatsapp-web.js';
-import { ICartService, IConversationStateManager, IProductService, IResponseService } from '../interfaces/services';
-import { CommandHandler } from '../handlers/commandHandler';
-import { OrderService } from './orderService';
+import { IProductService, ICartService, IConversationStateManager, IResponseService, IServiceService } from '../interfaces/services';
 import { BotResponder } from './logic/botService/botResponder';
+import { OrderService } from './orderService';
+import { CommandHandler } from '../handlers/commandHandler';
 import { CheckoutProcessor } from './logic/botService/checkoutProcessor';
-import { CategoryHelper } from './logic/botService/categoryHelper';
+import { ProductPurchaseHandler } from './logic/botService/handler/botResponder/productPurchaseHandler';
+import { ServiceInquiryHandler } from './logic/botService/handler/botResponder/serviceInquiryHandler';
+import { CheckoutHandler } from './logic/botService/handler/botResponder/checkoutHandler';
+import { ImageHandler } from './logic/botService/handler/botResponder/imageHandler';
+import { RespuestaGenericaHandler } from './logic/botService/handler/botResponder/respuestaGenericaHandler';
+import { CompraHandler } from './logic/botService/handler/botResponder/compraHandler';
+import logger from '../utils/logger';
 
 export class BotService {
   private botResponder: BotResponder;
   private checkoutProcessor: CheckoutProcessor;
-  private categoryHelper: CategoryHelper;
 
   constructor(
     private readonly responseService: IResponseService,
@@ -17,47 +21,80 @@ export class BotService {
     private readonly cartService: ICartService,
     private readonly stateManager: IConversationStateManager,
     private readonly commandHandler: CommandHandler,
-    private readonly orderService: OrderService
+    private readonly orderService: OrderService,
+    private readonly serviceService: IServiceService
   ) {
+    // Log de diagnóstico para verificar que los servicios se inicializan correctamente
+    logger.info('🔧 Inicializando BotService...');
+    
+    const productos = this.productService.getProductos();
+    const servicios = this.serviceService.getServices();
+    
+    logger.info(`📦 Productos disponibles: ${productos.length} categorías`);
+    productos.forEach((cat, index) => {
+      logger.info(`  Categoría ${index + 1}: ${cat.categoria} - ${cat.productos.length} productos`);
+    });
+    
+    logger.info(`🏛️ Servicios disponibles: ${servicios.length} categorías`);
+    servicios.forEach((cat, index) => {
+      logger.info(`  Categoría ${index + 1}: ${cat.categoria} - ${cat.productos.length} servicios`);
+    });
+    
+    // Create all the handlers
+    const productPurchaseHandler = new ProductPurchaseHandler(cartService, productService, stateManager);
+    const serviceInquiryHandler = new ServiceInquiryHandler(serviceService, stateManager);
+    const checkoutHandler = new CheckoutHandler(cartService, stateManager, orderService);
+    const imageHandler = new ImageHandler(productService, serviceService, stateManager);
+    const respuestaGenericaHandler = new RespuestaGenericaHandler(responseService, stateManager);
+    const compraHandler = new CompraHandler(productService, cartService, stateManager);
+
+    this.botResponder = new BotResponder(
+      stateManager,
+      commandHandler,
+      productService,
+      serviceService,
+      responseService,
+      cartService,
+      productPurchaseHandler,
+      serviceInquiryHandler,
+      checkoutHandler,
+      imageHandler,
+      respuestaGenericaHandler,
+      compraHandler
+    );
+    
     this.checkoutProcessor = new CheckoutProcessor(
       cartService,
       stateManager,
       productService,
       orderService
     );
-    this.categoryHelper = new CategoryHelper(productService);
-    this.botResponder = new BotResponder(
-      responseService,
-      productService,
-      cartService,
-      stateManager,
-      commandHandler,
-      orderService,
-      this
-    );
+    
+    logger.info('✅ BotService inicializado correctamente');
   }
 
-  /**
-   * Genera una respuesta para el mensaje recibido
-   * @param message Mensaje recibido
-   * @returns Respuesta generada
-   */
-
-  public async generateResponse(message: Message): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia, invoiceCaption?: string }> {
-    return this.botResponder.generateResponse(message);
-  }
-  
-  /**
-   * Procesa el checkout del pedido
-   */
-  public async procesarCheckout(userId: string, mensaje: string): Promise<string | { text: string, invoiceMedia?: MessageMedia, invoiceCaption?: string }> {
-    return this.checkoutProcessor.procesarCheckout(userId, mensaje);
+  public async procesarMensaje(message: any): Promise<string | { text: string, media?: any, invoiceMedia?: any, invoiceCaption?: string }> {
+    try {
+      const userId = message.from;
+      const userMessage = message.body;
+      return await this.botResponder.procesarMensaje(userId, userMessage);
+    } catch (error) {
+      logger.error('Error al procesar mensaje:', error);
+      return 'Lo siento, ha ocurrido un error. Por favor, intenta nuevamente.';
+    }
   }
 
-  /**
-   * Verifica si el mensaje contiene una categoría válida
-   */
-  public esPosibleCategoria(mensaje: string): boolean {
-    return this.categoryHelper.esPosibleCategoria(mensaje);
+  public async procesarCheckout(userId: string, mensaje: string): Promise<string | { text: string, invoiceMedia?: any, invoiceCaption?: string }> {
+    return await this.checkoutProcessor.procesarCheckout(userId, mensaje);
+  }
+
+  public esPosibleCategoria(seleccion: string): boolean {
+    const categorias = this.productService.getCategorias();
+    const indice = parseInt(seleccion) - 1;
+    return indice >= 0 && indice < categorias.length;
+  }
+
+  public getServiceService(): IServiceService {
+    return this.serviceService;
   }
 }

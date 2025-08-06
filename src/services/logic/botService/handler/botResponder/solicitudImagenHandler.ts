@@ -6,22 +6,28 @@ export class SolicitudImagenHandler {
     private readonly stateManager: IConversationStateManager
   ) {}
 
-  public async manejarSolicitudImagen(userId: string, userMessage: string, state: any) {
+  public async manejarSolicitudImagen(userId: string, userMessage: string, state: any): Promise<string | { text: string, media?: any }> {
     const resultado = await this.productService.procesarSolicitudImagen(userMessage);
 
-    this.stateManager.updateState(userId, {
-      lastCategory: resultado.esCategoria ? 'menu_imagenes_categoria' : 'imagen_producto',
-      codigoVisto: userMessage,
-      timestamp: new Date()
-    });
-
     if (resultado.imagen) {
+      // Actualizar estado
+      this.stateManager.updateState(userId, {
+        lastCategory: 'imagen_producto',
+        timestamp: new Date()
+      });
+
       return {
         text: resultado.texto,
         media: resultado.imagen
       };
-    }
+    } else {
+      // Si no hay imagen, mostrar solo texto
+      this.stateManager.updateState(userId, {
+        lastCategory: 'imagen_producto',
+        timestamp: new Date()
+      });
 
-    return resultado.texto;
+      return resultado.texto;
+    }
   }
 }

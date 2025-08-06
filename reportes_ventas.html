@@ -1235,6 +1235,97 @@
           </tbody>
         </table>
 
+        <h3 class="summary-title">Consultas de Servicios</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Cédula</th>
+              <th>Teléfono</th>
+              <th>Servicio</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      // Agregar filas para cada consulta de servicio
+      if (data.serviceInquiries && data.serviceInquiries.length > 0) {
+        data.serviceInquiries.forEach((inquiry, index) => {
+          const statusClass = inquiry.status === 'pending' ? 'status-pending' : 
+                            inquiry.status === 'contacted' ? 'status-completed' : 'status-cancelled';
+          const statusText = inquiry.status === 'pending' ? 'Pendiente' : 
+                           inquiry.status === 'contacted' ? 'Contactado' : 'Completado';
+          
+          html += `
+            <tr>
+              <td>${inquiry.serviceId}</td>
+              <td>${new Date(inquiry.date).toLocaleString()}</td>
+              <td>${inquiry.userName}</td>
+              <td>${inquiry.cedula}</td>
+              <td>${inquiry.phone}</td>
+              <td>${inquiry.serviceName}</td>
+              <td><span class="${statusClass}">${statusText}</span></td>
+            </tr>
+          `;
+        });
+      } else {
+        html += `
+          <tr>
+            <td colspan="7" class="text-center">No hay consultas de servicios en este período</td>
+          </tr>
+        `;
+      }
+
+      // --- AGREGAR SECCIÓN DE SOLICITUDES DE HOSPEDAJE ---
+      // Filtrar consultas de servicios de hospedaje
+      const hospedajeInquiries = (data.serviceInquiries || []).filter(inq => {
+        const nombre = (inq.serviceName || '').toLowerCase();
+        return nombre.includes('hospedaje') || nombre.includes('retiro');
+      });
+      html += `
+        <h3 class="summary-title">Solicitudes de Hospedaje</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Cédula</th>
+              <th>Teléfono</th>
+              <th>Servicio</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      if (hospedajeInquiries.length > 0) {
+        hospedajeInquiries.forEach(inquiry => {
+          const statusClass = inquiry.status === 'pending' ? 'status-pending' : 
+                              inquiry.status === 'contacted' ? 'status-completed' : 'status-cancelled';
+          const statusText = inquiry.status === 'pending' ? 'Pendiente' : 
+                             inquiry.status === 'contacted' ? 'Contactado' : 'Completado';
+          html += `
+            <tr>
+              <td>${new Date(inquiry.date).toLocaleString()}</td>
+              <td>${inquiry.userName}</td>
+              <td>${inquiry.cedula}</td>
+              <td>${inquiry.phone}</td>
+              <td>${inquiry.serviceName}</td>
+              <td><span class="${statusClass}">${statusText}</span></td>
+            </tr>
+          `;
+        });
+      } else {
+        html += `<tr><td colspan="6" class="text-center">No hay solicitudes de hospedaje en este período</td></tr>`;
+      }
+      html += `</tbody></table>`;
+
+      html += `
+          </tbody>
+        </table>
+
         <p><strong>Fecha del reporte:</strong> ${new Date().toLocaleString()}</p>
       `;
 
@@ -1396,6 +1487,41 @@
               XLSX.utils.book_append_sheet(wb, wsOrderDetail, `Pedido ${index + 1}`);
             }
           });
+        }
+
+        // Agregar hoja de solicitudes de hospedaje
+        if (currentReportData && currentReportData.serviceInquiries) {
+          const hospedajeInquiries = currentReportData.serviceInquiries.filter(inq => {
+            const nombre = (inq.serviceName || '').toLowerCase();
+            return nombre.includes('hospedaje') || nombre.includes('retiro');
+          });
+          if (hospedajeInquiries.length > 0) {
+            const hospedajeData = [
+              ['Fecha', 'Cliente', 'Cédula', 'Teléfono', 'Servicio', 'Estado']
+            ];
+            hospedajeInquiries.forEach(inq => {
+              const statusText = inq.status === 'pending' ? 'Pendiente' : 
+                                 inq.status === 'contacted' ? 'Contactado' : 'Completado';
+              hospedajeData.push([
+                new Date(inq.date).toLocaleString(),
+                inq.userName,
+                inq.cedula,
+                inq.phone,
+                inq.serviceName,
+                statusText
+              ]);
+            });
+            const wsHospedaje = XLSX.utils.aoa_to_sheet(hospedajeData);
+            wsHospedaje['!cols'] = [
+              { wch: 20 }, // Fecha
+              { wch: 30 }, // Cliente
+              { wch: 15 }, // Cédula
+              { wch: 15 }, // Teléfono
+              { wch: 25 }, // Servicio
+              { wch: 12 }  // Estado
+            ];
+            XLSX.utils.book_append_sheet(wb, wsHospedaje, 'Solicitudes Hospedaje');
+          }
         }
 
         // Generar nombre del archivo con fecha actual

@@ -37,6 +37,20 @@
     "Descubre la variedad de productos que tenemos escribiendo *ver productos*.",
     "Todos los productos tienen descripciones detalladas en el catálogo."
   ],
+  "servicios": [
+    "Ofrecemos servicios de hospedaje y visitas guiadas. Escribe *ver servicios* para conocer nuestras opciones.",
+    "Tenemos servicios especiales para retiros espirituales. Escribe *ver servicios* para más información.",
+    "Nuestros servicios incluyen hospedaje y recorridos por el monasterio. Escribe *ver servicios* para ver detalles.",
+    "Contamos con servicios de hospedaje para retiros. Escribe *ver servicios* para conocer las opciones.",
+    "Ofrecemos servicios espirituales y de hospedaje. Escribe *ver servicios* para más información."
+  ],
+  "imagenes": [
+    "Puedes ver imágenes de nuestros productos escribiendo *ver imágenes*.",
+    "Tenemos fotos de todos nuestros productos. Escribe *ver imágenes* para verlas.",
+    "Las imágenes te ayudarán a conocer mejor nuestros productos. Escribe *ver imágenes*.",
+    "Puedes ver cómo se ven nuestros productos escribiendo *ver imágenes*.",
+    "Las imágenes muestran la calidad de nuestros productos. Escribe *ver imágenes* para verlas."
+  ],
   "compra": [
     "Para comprar, escribe: *quiero comprar* seguido del nombre exacto del producto. Por ejemplo: 'quiero comprar Frasco de 500 ml'",
     "Si deseas adquirir algún producto, escribe: *quiero comprar* y el nombre exacto del producto como aparece en el catálogo.",

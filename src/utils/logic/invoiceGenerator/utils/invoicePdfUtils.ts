@@ -186,7 +186,7 @@ function drawCustomerInfo(doc: PDFKit.PDFDocument, cliente: any) {
   const containerX = document.margin;
   const containerY = doc.y;
   const containerWidth = 520;
-  const containerHeight = 75;
+  const containerHeight = 90; // Aumentado para incluir cédula
   
   // Fondo del contenedor
   doc.rect(containerX - 3, containerY - 3, containerWidth + 6, containerHeight + 6)
@@ -215,20 +215,29 @@ function drawCustomerInfo(doc: PDFKit.PDFDocument, cliente: any) {
   doc.fontSize(fontSizes.body - 1)
      .fillColor(colors.dark)
      .font(fonts.emphasis)
-     .text('• Dirección:', containerX, startY + 18);
+     .text('• Cédula:', containerX, startY + 18);
   doc.fontSize(fontSizes.body - 1)
      .fillColor(colors.dark)
      .font(fonts.body)
-     .text(cliente.direccion, containerX + 80, startY + 18);
+     .text(cliente.cedula || 'No especificada', containerX + 80, startY + 18);
   
   doc.fontSize(fontSizes.body - 1)
      .fillColor(colors.dark)
      .font(fonts.emphasis)
-     .text('• Teléfono:', containerX, startY + 36);
+     .text('• Dirección:', containerX, startY + 36);
   doc.fontSize(fontSizes.body - 1)
      .fillColor(colors.dark)
      .font(fonts.body)
-     .text(cliente.telefono, containerX + 80, startY + 36);
+     .text(cliente.direccion, containerX + 80, startY + 36);
+  
+  doc.fontSize(fontSizes.body - 1)
+     .fillColor(colors.dark)
+     .font(fonts.emphasis)
+     .text('• Teléfono:', containerX, startY + 54);
+  doc.fontSize(fontSizes.body - 1)
+     .fillColor(colors.dark)
+     .font(fonts.body)
+     .text(cliente.telefono, containerX + 80, startY + 54);
   
   doc.y = containerY + containerHeight + 15;
 }

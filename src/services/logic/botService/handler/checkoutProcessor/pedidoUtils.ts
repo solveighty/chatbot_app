@@ -15,6 +15,7 @@ export function generarResumenPedido(carrito: any[], datosCliente: any, total: n
   resumen += `💰 *Total a pagar: $${totalFormateado}*\n\n`;
   resumen += `👤 *Datos del cliente:*\n`;
   resumen += `📝 Nombre: ${datosCliente.nombre}\n`;
+  resumen += `🆔 Cédula: ${datosCliente.cedula}\n`;
   resumen += `🏠 Dirección: ${datosCliente.direccion}\n`;
   resumen += `📱 Teléfono: ${datosCliente.telefono}\n\n`;
   resumen += `¿Deseas confirmar este pedido? Responde con *SI* para confirmar o *NO* para cancelar.`;

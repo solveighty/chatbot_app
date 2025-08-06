@@ -7,15 +7,18 @@ export class RespuestaGenericaHandler {
   ) {}
 
   public manejarRespuestaGenerica(userId: string, userMessage: string): string {
-    const category = this.responseService.determineCategory(userMessage);
-
-    // actualizar estado según la categoría detectada
-    if (category === 'productos') {
-      this.stateManager.updateState(userId, { lastCategory: 'menu_categorias', timestamp: new Date() });
-    } else {
-      this.stateManager.updateState(userId, { lastCategory: category, timestamp: new Date() });
-    }
-
-    return this.responseService.getRandomResponse(category);
+    // Determinar la categoría del mensaje
+    const categoria = this.responseService.determineCategory(userMessage);
+    
+    // Obtener respuesta aleatoria para la categoría
+    const respuesta = this.responseService.getRandomResponse(categoria);
+    
+    // Actualizar el estado del usuario
+    this.stateManager.updateState(userId, {
+      lastCategory: 'menu_principal',
+      timestamp: new Date()
+    });
+    
+    return respuesta;
   }
 }

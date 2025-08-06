@@ -1,4 +1,4 @@
-import { ICartService, IProductService, IResponseService } from '../interfaces/services';
+import { ICartService, IProductService, IResponseService, IServiceService } from '../interfaces/services';
 import { CommandResult } from './commandHandler/types/commandResult';
 import { processNumericCode } from './commandHandler/logic/processNumericCode';
 import { processDirectBuyCommand } from './commandHandler/logic/processDirectBuyCommand';
@@ -15,60 +15,81 @@ export class CommandHandler {
   constructor(
     private readonly productService: IProductService,
     private readonly cartService: ICartService,
-    private readonly responseService: IResponseService
+    private readonly responseService: IResponseService,
+    private readonly serviceService: IServiceService
   ) {}
 
-  public async handleCommand(command: string, userId: string, currentState: any): Promise<CommandResult> {
-    const commandLower = command.toLowerCase().trim();
+  public async handleCommand(message: string, userId: string, state: any): Promise<CommandResult> {
+    const messageLower = message.toLowerCase();
 
+    // Comando "productos" - ahora incluye servicios
+    if (messageLower === 'productos' || messageLower === 'ver productos') {
+      return {
+        response: this.productService.generarMenuCompletoConServicios(this.serviceService),
+        stateUpdates: {
+          lastCategory: 'menu_principal',
+          timestamp: new Date()
+        }
+      };
+    }
+    
     // Verificar si es un código numérico (1, 1.2, 1.2.3)
-    if (/^\d+(\.\d+)*$/.test(commandLower)) {
-      return processNumericCode(commandLower, this.productService);
+    if (/^\d+(\.\d+)*$/.test(messageLower)) {
+      return processNumericCode(messageLower, this.productService, this.serviceService);
     }
     
     // Si el mensaje comienza con "quiero comprar" seguido de un número
-    if (/^(quiero comprar|comprar|pedir|ordenar)\s+\d+(\.\d+)*$/i.test(commandLower)) {
-      return processDirectBuyCommand(commandLower, this.productService);
+    if (/^(quiero comprar|comprar|pedir|ordenar)\s+\d+(\.\d+)*$/i.test(messageLower)) {
+      return processDirectBuyCommand(messageLower, this.productService);
     }
     
     // comando de carrito
-    if (commandLower === 'carrito' || commandLower === 'ver carrito') {
+    if (messageLower === 'carrito' || messageLower === 'ver carrito') {
       return getCartSummary(this.cartService, userId);
     }
     
     // para finalizar compra
-    if (commandLower === 'finalizar compra') {
+    if (messageLower === 'finalizar compra') {
       return processCheckout(this.cartService, userId);
     }
     
     // para vaciar el carrito
-    if (commandLower === 'vaciar carrito' || commandLower === 'cancelar compra') {
+    if (messageLower === 'vaciar carrito' || messageLower === 'cancelar compra') {
       return clearUserCart(this.cartService, userId);
     }
     
     // para ayuda
     if (
-      commandLower === 'ayuda' ||
-      commandLower === 'help' ||
-      commandLower === 'como comprar' ||
-      commandLower === 'cómo comprar'
+      messageLower === 'ayuda' ||
+      messageLower === 'help' ||
+      messageLower === 'como comprar' ||
+      messageLower === 'cómo comprar'
     ) {
       return getHelpMessage(this.responseService);
     }
     
-    // para ver productos
+    // para ver servicios
     if (
-      commandLower === 'ver productos' ||
-      commandLower === 'productos' ||
-      commandLower === 'catálogo' ||
-      commandLower === 'catalogo'
+      messageLower === 'servicios' ||
+      messageLower === 'ver servicios' ||
+      messageLower === 'hospedaje' ||
+      messageLower === 'alojamiento'
     ) {
-      return getProductList(this.productService);
+      return {
+        response: this.serviceService.generateServicesMenu()
+      };
+    }
+    
+    // para contactar con hermanas
+    if (this.serviceService.isContactCommand(messageLower)) {
+      return {
+        response: this.serviceService.getContactHours()
+      };
     }
     
     // para ver imágenes
-    if (commandLower.includes('ver imágenes') || commandLower.includes('ver imagenes')) {
-      return await processImageRequest(commandLower, this.productService);
+    if (messageLower.includes('ver imágenes') || messageLower.includes('ver imagenes')) {
+      return await processImageRequest(messageLower, this.productService);
     }
 
     // si no reconoce el comando

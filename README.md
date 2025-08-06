@@ -145,6 +145,7 @@ npm start
 - `hola` - Saludo inicial y menú principal
 - `ayuda` - Muestra comandos disponibles
 - `productos` - Lista todas las categorías
+- `servicios` - Lista todos los servicios del monasterio
 - `carrito` - Muestra el carrito actual
 - `limpiar` - Vacía el carrito
 
@@ -155,11 +156,28 @@ npm start
 - `4` - Productos religiosos
 - `5` - Productos ecológicos
 
+#### **Servicios del Monasterio:**
+- `servicios` - Ver todos los servicios disponibles
+- `hospedaje` - Información sobre hospedaje
+- `alojamiento` - Información sobre alojamiento
+
+#### **Contacto con Hermanas:**
+- `quiero contactar con una hermana` - Horarios de contacto
+- `quiero llamar a una hermana` - Horarios de contacto
+- `contactar hermana` - Horarios de contacto
+- `llamar hermana` - Horarios de contacto
+- `hablar con hermana` - Horarios de contacto
+- `hermana disponible` - Horarios de contacto
+- `horarios hermana` - Horarios de contacto
+- `cuando puedo llamar` - Horarios de contacto
+- `horarios de atención` - Horarios de contacto
+
 #### **Gestión de Productos:**
 - `[número]` - Selecciona un producto
 - `cantidad [número]` - Especifica cantidad
 - `agregar` - Agrega al carrito
 - `quitar [número]` - Quita del carrito
+- `cancelar` - Cancela la selección de cantidad y vuelve al menú principal
 
 #### **Proceso de Compra:**
 - `comprar` - Inicia el proceso de checkout
@@ -247,6 +265,60 @@ Edita `assets/products.json` para modificar el catálogo:
       "descripcion": "Pan integral fresco",
       "imagen": "pan-integral.jpg"
     }
+  ]
+}
+```
+
+### **Configurar Servicios**
+
+Edita `assets/services.json` para modificar los servicios:
+
+```json
+{
+  "categoria": "Hospedaje",
+  "tipo": "servicio",
+  "descripcion": "Servicios de hospedaje en el monasterio",
+  "productos": [
+    {
+      "nombre": "Habitación Individual",
+      "descripcion": "Habitación privada con baño incluido",
+      "precio": 25.0,
+      "imagen": "images/hospedaje-individual.jpg",
+      "contacto": {
+        "telefono": "0999946157",
+        "mensaje": "Para reservar habitación individual, contacta directamente al WhatsApp: 0999946157"
+      }
+    }
+  ]
+}
+```
+
+### **Configurar Horarios de Contacto**
+
+Edita `assets/contact-hours.json` para modificar los horarios:
+
+```json
+{
+  "horarios": {
+    "lunes": {
+      "disponible": true,
+      "hora_inicio": "08:00",
+      "hora_fin": "17:00",
+      "descripcion": "Horario de atención normal"
+    }
+  },
+  "contacto": {
+    "telefono": "0999946157",
+    "whatsapp": "0999946157",
+    "mensaje_principal": "Para contactar con una hermana del monasterio...",
+    "mensaje_emergencia": "En caso de emergencia...",
+    "notas": [
+      "Los horarios pueden variar en días festivos"
+    ]
+  },
+  "comandos_contacto": [
+    "quiero contactar con una hermana",
+    "quiero llamar a una hermana"
   ]
 }
 ```

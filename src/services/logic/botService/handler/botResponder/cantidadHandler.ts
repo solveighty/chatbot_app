@@ -7,11 +7,30 @@ export class CantidadHandler {
   ) {}
 
   public manejarSolicitudCantidad(userId: string, userMessage: string, state: any): string {
+    const userMessageLower = userMessage.toLowerCase().trim();
+    
+    // Verificar si el usuario quiere cancelar
+    if (userMessageLower === 'cancelar' || userMessageLower === 'cancel' || userMessageLower === 'no' || userMessageLower === 'salir') {
+      // Limpiar el estado y volver al menú principal
+      this.stateManager.updateState(userId, {
+        lastCategory: 'menu_principal',
+        productoSeleccionado: null,
+        timestamp: new Date()
+      });
+
+      return `❌ *Compra cancelada*\n\n` +
+             `No se agregó ningún producto al carrito.\n\n` +
+             `🛒 Escribe *carrito* para ver tu carrito actual.\n` +
+             `📋 Escribe *productos* para ver el catálogo completo.\n` +
+             `➕ Puedes seguir comprando escribiendo *quiero comprar [producto]*.`;
+    }
+
     const cantidad = parseInt(userMessage);
 
     if (isNaN(cantidad) || cantidad <= 0) {
       return `Por favor, indica una cantidad válida usando solo números.\n` +
-             `Ejemplo: *2* para añadir dos unidades.`;
+             `Ejemplo: *2* para añadir dos unidades.\n\n` +
+             `❌ O escribe *cancelar* para salir sin agregar el producto.`;
     }
 
     const producto = state.productoSeleccionado;

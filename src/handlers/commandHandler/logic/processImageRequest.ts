@@ -17,7 +17,7 @@ export async function processImageRequest(
       return {
         response: { text: resultado.texto, media: resultado.imagen },
         stateUpdates: {
-          lastCategory: resultado.esCategoria ? 'menu_imagenes_categoria' : 'imagen_producto',
+          lastCategory: 'imagen_producto',
           codigoVisto: codigo,
           timestamp: new Date()
         }
@@ -26,7 +26,7 @@ export async function processImageRequest(
       return {
         response: resultado.texto,
         stateUpdates: {
-          lastCategory: resultado.esCategoria ? 'menu_imagenes_categoria' : 'imagen_producto',
+          lastCategory: 'imagen_producto',
           codigoVisto: codigo,
           timestamp: new Date()
         }

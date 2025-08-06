@@ -8,24 +8,18 @@ export function processCheckout(
   const cart = cartService.getCart(userId);
   if (cart.length === 0) {
     return {
-      response: "Tu carrito está vacío. Añade productos antes de finalizar la compra."
+      response: "❌ Tu carrito está vacío. Añade productos antes de finalizar la compra."
     };
   }
 
   return {
     response:
-      `Por favor, proporciona los siguientes datos para finalizar tu compra:\n\n` +
-      `1️⃣ *Tu nombre completo* (mínimo 3 caracteres)\n` +
-      `2️⃣ *Tu dirección de entrega* (solo si el pedido es de otra ciudad en servicio de Servientrega, en otro caso retirar al Monasterio)\n` +
-      `3️⃣ *Tu número de teléfono* (formato válido)\n\n` +
-      `Ejemplo:\n` +
-      `María Pérez\n` +
-      `Calle Principal 123, Ciudad\n` +
-      `0991234567\n\n` +
-      `Nota: Es muy importante proporcionar la información completa para procesar tu pedido.`,
+      `🛒 *Finalizar Compra*\n\n` +
+      `📝 *Para procesar tu pedido, necesito algunos datos:*\n\n` +
+      `👤 *Por favor, escribe tu nombre completo:*\n\n` +
+      `❌ O escribe *cancelar* para salir sin finalizar la compra.`,
     stateUpdates: {
-      lastCategory: 'checkout',
-      etapaPedido: 'datos_cliente',
+      lastCategory: 'solicitar_nombre_checkout',
       timestamp: new Date()
     }
   };

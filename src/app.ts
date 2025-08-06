@@ -1,5 +1,5 @@
 import { WHATSAPP_CLIENT_OPTIONS } from './config/environment';
-import { handleMessage } from './handlers/messageHandler';
+import { MessageHandler } from './handlers/messageHandler';
 import { WhatsAppClient } from './core/client';
 import { setupDependencies } from './config/di';
 import logger from './utils/logger';
@@ -22,7 +22,8 @@ async function initializeServices() {
         
         // Configurar dependencias
         const { botService } = setupDependencies();
-        const messageProcessor = (message: any) => handleMessage(message, botService);
+        const messageHandler = new MessageHandler(botService);
+        const messageProcessor = (message: any) => messageHandler.handleMessage(message);
         
         // Iniciar cliente de WhatsApp
         const client = new WhatsAppClient(WHATSAPP_CLIENT_OPTIONS, messageProcessor);

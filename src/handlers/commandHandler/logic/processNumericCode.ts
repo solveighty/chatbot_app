@@ -1,10 +1,32 @@
-import { IProductService } from '../../../interfaces/services';
+import { IProductService, IServiceService } from '../../../interfaces/services';
 import { CommandResult } from '../types/commandResult';
 
 export function processNumericCode(
   code: string,
-  productService: IProductService
+  productService: IProductService,
+  serviceService?: IServiceService
 ): CommandResult {
+  const codigoNum = parseInt(code);
+  
+  // Verificar si es un servicio (15-17)
+  if (serviceService && codigoNum >= 15 && codigoNum <= 17) {
+    const service = serviceService.getServiceById(codigoNum);
+    if (service) {
+      return {
+        response: `🏛️ *${service.nombre}*\n\n` +
+                 `${service.descripcion}\n\n` +
+                 `📱 *Contacto:* ${service.contacto.telefono}\n\n` +
+                 `${service.contacto.mensaje}\n\n` +
+                 `💬 Para obtener más información, escribe: *quiero contactar con una hermana*`,
+        stateUpdates: {
+          lastCategory: 'menu_principal',
+          timestamp: new Date()
+        }
+      };
+    }
+  }
+
+  // Verificar si es un producto
   const producto = productService.buscarProductoPorCodigo(code);
 
   if (producto) {
@@ -15,7 +37,8 @@ export function processNumericCode(
         `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
         `🏷️ Categoría: ${producto.categoria}\n\n` +
         `*¿Cuántas unidades deseas añadir al carrito?*\n` +
-        `Responde con un número (ejemplo: 2)`,
+        `Responde con un número (ejemplo: 2)\n\n` +
+        `❌ O escribe *cancelar* para salir sin agregar el producto.`,
       stateUpdates: {
         lastCategory: 'solicitar_cantidad',
         productoSeleccionado: producto,
@@ -44,8 +67,8 @@ export function processNumericCode(
 
     return {
       response:
-        `❌ No encontré ningún producto con el código ${code}.\n\n` +
-        `Por favor, verifica el código en el catálogo. Escribe *ver productos* para ver la lista completa.`,
+        `❌ No encontré ningún producto o servicio con el código ${code}.\n\n` +
+        `Por favor, verifica el código en el catálogo. Escribe *productos* para ver la lista completa.`,
     };
   }
 }

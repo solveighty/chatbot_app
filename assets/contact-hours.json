@@ -1,0 +1,111 @@
+{
+  "horarios": {
+    "lunes": {
+      "disponible": true,
+      "hora_inicio": "10:00",
+      "hora_fin": "12:00",
+      "descripcion": "Horario de atención mañana"
+    },
+    "lunes_tarde": {
+      "disponible": true,
+      "hora_inicio": "15:30",
+      "hora_fin": "16:30",
+      "descripcion": "Horario de atención tarde"
+    },
+    "martes": {
+      "disponible": true,
+      "hora_inicio": "10:00",
+      "hora_fin": "12:00",
+      "descripcion": "Horario de atención mañana"
+    },
+    "martes_tarde": {
+      "disponible": true,
+      "hora_inicio": "15:30",
+      "hora_fin": "16:30",
+      "descripcion": "Horario de atención tarde"
+    },
+    "miercoles": {
+      "disponible": true,
+      "hora_inicio": "10:00",
+      "hora_fin": "12:00",
+      "descripcion": "Horario de atención mañana"
+    },
+    "miercoles_tarde": {
+      "disponible": true,
+      "hora_inicio": "15:30",
+      "hora_fin": "16:30",
+      "descripcion": "Horario de atención tarde"
+    },
+    "jueves": {
+      "disponible": true,
+      "hora_inicio": "10:00",
+      "hora_fin": "12:00",
+      "descripcion": "Horario de atención mañana"
+    },
+    "jueves_tarde": {
+      "disponible": true,
+      "hora_inicio": "15:30",
+      "hora_fin": "16:30",
+      "descripcion": "Horario de atención tarde"
+    },
+    "viernes": {
+      "disponible": true,
+      "hora_inicio": "10:00",
+      "hora_fin": "12:00",
+      "descripcion": "Horario de atención mañana"
+    },
+    "viernes_tarde": {
+      "disponible": true,
+      "hora_inicio": "15:30",
+      "hora_fin": "16:30",
+      "descripcion": "Horario de atención tarde"
+    },
+    "sabado": {
+      "disponible": true,
+      "hora_inicio": "10:00",
+      "hora_fin": "12:00",
+      "descripcion": "Horario de atención mañana"
+    },
+    "sabado_tarde": {
+      "disponible": true,
+      "hora_inicio": "15:30",
+      "hora_fin": "16:30",
+      "descripcion": "Horario de atención tarde"
+    },
+    "domingo": {
+      "disponible": true,
+      "hora_inicio": "10:00",
+      "hora_fin": "12:00",
+      "descripcion": "Horario de atención mañana"
+    },
+    "domingo_tarde": {
+      "disponible": true,
+      "hora_inicio": "15:30",
+      "hora_fin": "16:30",
+      "descripcion": "Horario de atención tarde"
+    }
+  },
+  "contacto": {
+    "telefono": "0999946157",
+    "whatsapp": "0999946157",
+    "mensaje_principal": "Para contactar con una hermana del monasterio, puedes comunicarte en los siguientes horarios:",
+    "mensaje_emergencia": "En caso de emergencia, puedes enviar un mensaje fuera de horario y te responderemos lo antes posible.",
+    "notas": [
+      "Los horarios pueden variar en días festivos",
+      "Durante retiros espirituales, la atención puede ser limitada",
+      "Se recomienda contactar con anticipación para reservas"
+    ]
+  },
+  "comandos_contacto": [
+    "quiero contactar con una hermana",
+    "quiero llamar a una hermana",
+    "contactar hermana",
+    "llamar hermana",
+    "hablar con hermana",
+    "contacto hermana",
+    "hermana disponible",
+    "horarios hermana",
+    "cuando puedo llamar",
+    "horarios de atención"
+  ]
+} 

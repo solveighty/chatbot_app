@@ -8,12 +8,15 @@ import { getOrdersByDateRangeLogic } from './logic/orderService/logic/getOrdersB
 import { getOrdersByProductLogic } from './logic/orderService/logic/getOrdersByProduct';
 import { getOrdersByStatusLogic } from './logic/orderService/logic/getOrdersByStatus';
 import { generateSalesSummaryLogic } from './logic/orderService/logic/generateSalesSummary';
+import { ServiceService } from './serviceService';
 
 
 export class OrderService {
+  private serviceService: ServiceService;
   private ordersFilePath: string;
 
-  constructor() {
+  constructor(serviceService: ServiceService) {
+    this.serviceService = serviceService;
     this.ordersFilePath = path.resolve(process.cwd(), 'dist/data', 'orders.json');
     this.initOrdersFile();
   }
@@ -82,7 +85,22 @@ export class OrderService {
    */
   public generateSalesSummary(startDate: string, endDate: string, product?: string, status?: string) {
     const orders = this.getOrdersByDateRange(startDate, endDate);
-    return generateSalesSummaryLogic(orders, startDate, endDate, product, status);
+    const serviceInquiries = this.serviceService.getServiceInquiries();
+    
+    // Filtrar consultas de servicios por fecha
+    const filteredInquiries = serviceInquiries.filter(inquiry => {
+      const inquiryDate = new Date(inquiry.date);
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return inquiryDate >= start && inquiryDate <= end;
+    });
+
+    const summary = generateSalesSummaryLogic(orders, startDate, endDate, product, status);
+    
+    return {
+      ...summary,
+      serviceInquiries: filteredInquiries
+    };
   }
 
   /**

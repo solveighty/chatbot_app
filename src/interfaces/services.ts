@@ -1,47 +1,33 @@
-import { MessageMedia } from 'whatsapp-web.js';
-import { CartItem } from '../services/logic/cartService/types/cartItem';
-
-export interface PedidoResult {
-  texto: string;
-  encontrado: boolean;
-  producto?: { nombre: string; precio: number; categoria: string };
-}
-
-export interface IResponseService {
-  getRandomResponse(category: string): string;
-  determineCategory(message: string): string;
-  getHelpMessage(): string;
-}
+import { CartItem } from "../services/cartService";
+import { ServiceService } from "../services/serviceService";
 
 export interface IProductService {
+  getProductos(): any[];
   getCategorias(): string[];
-  getProductosPorCategoria(nombreCategoria: string): any[];
-  generarListaProductos(): string;
+  getProductosPorCategoria(categoria: string): any[];
+  buscarProductos(termino: string): any[];
+  buscarProductoExacto(nombre: string): any;
+  buscarProductoPorCodigo(codigo: string): any;
+  buscarProductoEnCategoria(categoria: string, nombre: string): any;
   generarMenuCategorias(): string;
-  procesarSeleccionCategoria(seleccion: string): Promise<{ texto: string; imagen?: MessageMedia }>;
-  procesarPedido(pedido: string): PedidoResult;
-  buscarProductos(termino: string): string;
-  buscarProductoExacto(nombreProducto: string): { nombre: string; precio: number; categoria: string } | null;
-  buscarProductoEnCategoria(nombreCategoria: string, nombreProducto: string): any | null;
-  obtenerIndiceCategoria(seleccion: string): number;
-  obtenerImagenProducto(producto: any): Promise<MessageMedia | undefined>;
-  buscarProductoPorCodigo(codigo: string): { nombre: string; precio: number; categoria: string } | null;
-  generarListaProductosCategoria(nombreCategoria: string): string;
+  generarListaProductos(): string;
+  generarListaProductosCategoria(categoria: string): string;
   generarListaProductosNumerados(): string;
-  procesarSolicitudImagen(codigo: string): Promise<{
-    texto: string;
-    imagen?: MessageMedia;
-    esCategoria: boolean;
-  }>;
   generarMenuImagenesNumerado(): string;
+  procesarSeleccionCategoria(mensaje: string): Promise<{ texto: string; imagen?: any }>;
+  obtenerImagenProducto(producto: any): Promise<any>;
+  procesarPedido(productos: any[]): any;
+  procesarSolicitudImagen(mensaje: string): Promise<{ texto: string; imagen?: any; esCategoria?: boolean }>;
+  getProductById(id: number): any;
+  generarMenuCompletoConServicios(serviceService: any): string;
 }
 
 export interface ICartService {
-  getCart(userId: string): CartItem[];
-  addItemToCart(userId: string, producto: { nombre: string; precio: number; categoria: string }, cantidad?: number): CartItem[];
+  addItemToCart(userId: string, item: CartItem, cantidad: number): void;
   removeItemFromCart(userId: string, index: number): boolean;
-  clearCart(userId: string): void;
+  getCart(userId: string): CartItem[];
   getCartTotal(userId: string): number;
+  clearCart(userId: string): void;
   generateCartSummary(userId: string): string;
 }
 
@@ -49,4 +35,27 @@ export interface IConversationStateManager {
   getState(userId: string): any;
   updateState(userId: string, updates: any): void;
   clearState(userId: string): void;
+}
+
+export interface IResponseService {
+  getRandomResponse(category: string): string;
+  determineCategory(message: string): string;
+  containsAny(message: string, keywords: string[]): boolean;
+  getHelpMessage(): string;
+  getImageHelpMessage(): string;
+}
+
+export interface IServiceService {
+  getServices(): any[];
+  getServiceCategories(): string[];
+  getServiceByCategory(categoria: string): any;
+  getServiceProduct(categoria: string, nombre: string): any;
+  getServiceById(id: number): any;
+  generateServicesMenu(): string;
+  generateServiceDetails(categoria: string): string;
+  getContactHours(): string;
+  isContactCommand(message: string): boolean;
+  getServiceContactInfo(categoria: string, nombre: string): string;
+  processServiceInquiry(userId: string, serviceId: number, userData: { nombre: string; cedula: string; telefono: string }): Promise<string>;
+  getServiceInquiries(): any[];
 }
