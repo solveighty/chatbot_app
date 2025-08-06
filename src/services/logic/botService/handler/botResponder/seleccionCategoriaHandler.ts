@@ -19,4 +19,22 @@ export class SeleccionCategoriaHandler {
     }
     return resultado.texto;
   }
+
+  public async manejarSeleccionCategoria(userId: string, userMessage: string, state: any) {
+    // Procesar la selección de categoría
+    const resultado = await this.productService.procesarSeleccionCategoria(userMessage);
+
+    if (resultado.imagen) {
+      // Guardar la categoría seleccionada en el estado para futuras consultas
+      this.stateManager.updateState(userId, { 
+        categoriaSeleccionada: userMessage 
+      });
+
+      return {
+        text: resultado.texto,
+        media: resultado.imagen
+      };
+    }
+    return resultado.texto;
+  }
 }

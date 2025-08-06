@@ -1,0 +1,46 @@
+[
+  {
+    "categoria": "Hospedaje",
+    "tipo": "servicio",
+    "descripcion": "Servicios de hospedaje en el monasterio",
+    "productos": [
+      {
+        "id": 25,
+        "nombre": "Habitación Individual",
+        "descripcion": "Habitación privada con baño incluido",
+        "imagen": "images/hospedaje-individual.jpg",
+        "contacto": {
+          "telefono": "0999946157",
+          "mensaje": "Para reservar habitación individual, contacta directamente al WhatsApp: 0999946157"
+        }
+      },
+      {
+        "id": 26,
+        "nombre": "Retiro Espiritual",
+        "descripcion": "Incluye hospedaje, alimentación y actividades espirituales",
+        "imagen": "images/retiro-espiritual.jpg",
+        "contacto": {
+          "telefono": "0999946157",
+          "mensaje": "Para información sobre retiros espirituales, contacta directamente al WhatsApp: 0999946157"
+        }
+      }
+    ]
+  },
+  {
+    "categoria": "Encuadernación",
+    "tipo": "servicio",
+    "descripcion": "Servicios de encuadernación artesanal y restauración",
+    "productos": [
+      {
+        "id": 27,
+        "nombre": "Encuadernación Artesanal",
+        "descripcion": "Encuadernación artesanal con materiales especiales y acabados finos",
+        "imagen": "images/encuadernacion-artesanal.jpg",
+        "contacto": {
+          "telefono": "0999946157",
+          "mensaje": "Para información sobre encuadernación artesanal, contacta directamente al WhatsApp: 0999946157"
+        }
+      }
+    ]
+  }
+] 

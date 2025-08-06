@@ -3,6 +3,7 @@ import { CartItem } from "../../cartService/types/cartItem";
 export interface OrderData {
   orderId: string;
   clientName: string;
+  clientCedula?: string;
   clientAddress: string;
   clientPhone: string;
   items: CartItem[];

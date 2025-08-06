@@ -3,11 +3,13 @@
     "categoria": "Miel de Abeja",
     "productos": [
       {
+        "id": 1,
         "nombre": "Frasco de 500 ml",
         "precio": 10.0,
         "imagen": "images/miel-500ml.jpg"
       },
       {
+        "id": 2,
         "nombre": "Frasco de 300 ml",
         "precio": 6.0,
         "imagen": "images/miel-300ml.jpg"
@@ -18,11 +20,13 @@
     "categoria": "Cake",
     "productos": [
       {
+        "id": 3,
         "nombre": "De 260 gr",
         "precio": 3.0,
         "imagen": "images/cake-260g.jpg"
       },
       {
+        "id": 4,
         "nombre": "De 745 gr",
         "precio": 5.75,
         "imagen": "images/cake-745g.jpg"
@@ -33,11 +37,13 @@
     "categoria": "Alfajores",
     "productos": [
       {
+        "id": 5,
         "nombre": "Fundita de 3 unidades",
         "precio": 1.0,
         "imagen": "images/alfajores-3u.jpg"
       },
       {
+        "id": 6,
         "nombre": "1 unidad",
         "precio": 0.3,
         "imagen": "images/alfajor-1u.jpg"
@@ -48,11 +54,13 @@
     "categoria": "Manjar de Leche",
     "productos": [
       {
+        "id": 7,
         "nombre": "Frasco de 550 gr",
         "precio": 4.0,
         "imagen": "images/manjar-550g.jpg"
       },
       {
+        "id": 8,
         "nombre": "Frasco de 300 gr",
         "precio": 2.8,
         "imagen": "images/manjar-300g.jpg"
@@ -63,16 +71,19 @@
     "categoria": "Propóleo",
     "productos": [
       {
+        "id": 9,
         "nombre": "Antibacteriológico y cicatrizante",
         "precio": 3.0,
         "imagen": "images/propolis-antibac.jpg"
       },
       {
+        "id": 10,
         "nombre": "Crema facial quita manchas y antiarrugas",
         "precio": 5.0,
         "imagen": "images/crema-facial.jpg"
       },
       {
+        "id": 11,
         "nombre": "Crema para heridas, varices, granos",
         "precio": 5.0,
         "imagen": "images/crema-heridas.jpg"
@@ -83,6 +94,7 @@
     "categoria": "Iconos Religiosos",
     "productos": [
       {
+        "id": 12,
         "nombre": "Diferentes advocaciones, clases de madera, tamaños y diseños",
         "precio": 3.10,
         "imagen": "images/iconos_religiosos.jpg"
@@ -93,21 +105,25 @@
     "categoria": "Cerámicas",
     "productos": [
       {
+        "id": 13,
         "nombre": "Cerámica $1,00",
         "precio": 1.0,
         "imagen": "images/ceramica-1.jpg"
       },
       {
+        "id": 14,
         "nombre": "Cerámica $2,25",
         "precio": 2.25,
         "imagen": "images/ceramica-2_25.jpg"
       },
       {
+        "id": 15,
         "nombre": "Cerámica $2,50",
         "precio": 2.5,
         "imagen": "images/ceramica-2_5.jpg"
       },
       {
+        "id": 16,
         "nombre": "Cerámica $2,75",
         "precio": 2.75,
         "imagen": "images/ceramica-2_75.jpg"
@@ -118,6 +134,7 @@
     "categoria": "Fundas Ecológicas",
     "productos": [
       {
+        "id": 17,
         "nombre": "Colores: crema, café y negro",
         "precio": 2.0,
         "imagen": "images/fundas-ecologicas.jpg",
@@ -138,6 +155,7 @@
     "categoria": "Rosarios",
     "productos": [
       {
+        "id": 18,
         "nombre": "Material: Metal, Plástico, Madera",
         "precio": 3.50,
         "imagen": "images/rosarios.jpg",
@@ -162,6 +180,7 @@
     "categoria": "Cactus",
     "productos": [
       {
+        "id": 19,
         "nombre": "Diferentes formas",
         "precio": 1.0,
         "imagen": "images/cactus.jpg"
@@ -172,6 +191,7 @@
     "categoria": "CD Himno Monástico",
     "productos": [
       {
+        "id": 20,
         "nombre": "CD de Himnos",
         "precio": 5.0,
         "imagen": "images/cd-himnos.jpg"
@@ -182,6 +202,7 @@
     "categoria": "Cirios Pascuales",
     "productos": [
       {
+        "id": 21,
         "nombre": "Cirio Pascual",
         "precio": 80.0,
         "imagen": "images/cirio-pascual.jpg"
@@ -192,6 +213,7 @@
     "categoria": "Cirios Litúrgicos",
     "productos": [
       {
+        "id": 22,
         "nombre": "De 24 cm - Blanco, Verde, Amarillo, Rojo, Morado",
         "precio": 7.20,
         "imagen": "images/cirio-24cm.jpg",
@@ -219,6 +241,7 @@
         ]
       },
       {
+        "id": 23,
         "nombre": "De 12 cm - Blanco, Verde, Amarillo, Rojo, Morado",
         "precio": 4.35,
         "imagen": "images/cirio-12cm.jpg",
@@ -251,6 +274,7 @@
     "categoria": "Pulseras - Denarios",
     "productos": [
       {
+        "id": 24,
         "nombre": "Materiales: Madera, Plástico",
         "precio": 2.5,
         "imagen": "images/pulseras_denarios.jpg",

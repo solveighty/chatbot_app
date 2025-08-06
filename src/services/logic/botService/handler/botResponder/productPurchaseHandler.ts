@@ -1,47 +1,48 @@
-import { IProductService, IConversationStateManager, ICartService } from '../../../../../interfaces/services';
+import { IConversationStateManager } from '../../../../../interfaces/services';
+import { ICartService } from '../../../../../interfaces/services';
+import { IProductService } from '../../../../../interfaces/services';
 
-export class CompraHandler {
+export class ProductPurchaseHandler {
   constructor(
-    private readonly productService: IProductService,
     private readonly cartService: ICartService,
+    private readonly productService: IProductService,
     private readonly stateManager: IConversationStateManager
   ) {}
 
-  public manejarCompra(userId: string, userMessage: string): string {
-    // Extraer el nombre del producto del mensaje
-    const nombreProducto = userMessage.replace(/quiero comprar|comprar|pedir/gi, '').trim();
-    
-    if (!nombreProducto) {
-      return '❌ Por favor, especifica qué producto quieres comprar.\n\n' +
-             'Ejemplo: *quiero comprar Frasco de 500 ml*';
+  public async handleProductPurchase(userId: string, userMessage: string, state: any): Promise<string | null> {
+    const userMessageLower = userMessage.toLowerCase();
+
+    // Si el usuario está en estado de solicitud de cantidad para compra
+    if (state && state.lastCategory === 'solicitar_cantidad_compra') {
+      return this.handleCantidadInput(userId, userMessage, state);
     }
 
-    // Buscar el producto
-    const producto = this.productService.buscarProductoExacto(nombreProducto);
-    
-    if (!producto) {
-      return `❌ No se encontró el producto "${nombreProducto}".\n\n` +
-             '📋 Escribe *productos* para ver el catálogo completo.\n' +
-             '💡 Asegúrate de escribir el nombre exacto del producto.';
+    // Procesar ID de producto
+    const productId = parseInt(userMessage);
+    if (!isNaN(productId) && productId >= 1 && productId <= 24) {
+      const product = this.productService.getProductById(productId);
+      if (product) {
+        // Iniciar proceso solicitando cantidad
+        this.stateManager.updateState(userId, {
+          lastCategory: 'solicitar_cantidad_compra',
+          productId: productId,
+          productName: product.nombre,
+          productPrice: product.precio,
+          timestamp: new Date()
+        });
+
+        return `🛒 *${product.nombre}*\n\n` +
+               `💰 Precio: $${product.precio.toFixed(2).replace('.', ',')}\n` +
+               `📦 Categoría: ${product.categoria}\n\n` +
+               `📝 *¿Cuántas unidades quieres agregar al carrito?*\n\n` +
+               `❌ O escribe *cancelar* para salir sin agregar.`;
+      }
     }
 
-    // Actualizar estado para solicitar cantidad
-    this.stateManager.updateState(userId, {
-      lastCategory: 'solicitar_cantidad_compra',
-      productoSeleccionado: producto,
-      productName: producto.nombre,
-      productPrice: producto.precio,
-      timestamp: new Date()
-    });
-
-    return `🛒 *${producto.nombre}*\n\n` +
-           `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
-           `📦 Categoría: ${producto.categoria}\n\n` +
-           `📝 *¿Cuántas unidades quieres agregar al carrito?*\n\n` +
-           `❌ O escribe *cancelar* para salir sin agregar.`;
+    return null;
   }
 
-  public manejarCantidad(userId: string, userMessage: string, state: any): string {
+  private handleCantidadInput(userId: string, userMessage: string, state: any): string {
     const userMessageLower = userMessage.toLowerCase();
     
     // Verificar si el usuario quiere cancelar
@@ -96,4 +97,4 @@ export class CompraHandler {
       return '❌ Error al agregar el producto al carrito. Por favor, intenta nuevamente.';
     }
   }
-}
+} 

@@ -1,19 +1,21 @@
-import { Message, MessageMedia } from 'whatsapp-web.js';
+import { Message } from 'whatsapp-web.js';
 import { BotService } from '../services/botService';
-import { logMessageProcessing, logMessageError } from './messageHandler/logMessageProcessing';
+import { logMessageProcessing } from './messageHandler/logMessageProcessing';
+import logger from '../utils/logger';
 
-export const handleMessage = async (
-    message: Message, 
-    botService: BotService
-): Promise<string | { text: string, media?: MessageMedia, invoiceMedia?: MessageMedia, invoiceCaption?: string } | undefined> => {
+export class MessageHandler {
+  constructor(private readonly botService: BotService) {}
+
+  public async handleMessage(message: Message): Promise<string | { text: string, media?: any, invoiceMedia?: any, invoiceCaption?: string }> {
     try {
-        if (message.body) {
-            logMessageProcessing(message.body);
-            return await botService.generateResponse(message);
-        }
-        return undefined;
+      // Log del procesamiento del mensaje
+      logMessageProcessing(message.body);
+
+      // Procesar el mensaje con el bot service
+      return await this.botService.procesarMensaje(message);
     } catch (error) {
-        logMessageError(error);
-        return undefined;
+      logger.error('Error en MessageHandler:', error);
+      return 'Lo siento, ha ocurrido un error al procesar tu mensaje.';
     }
-};
+  }
+}

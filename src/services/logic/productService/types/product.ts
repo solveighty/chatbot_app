@@ -4,9 +4,10 @@ export interface Variante {
 }
 
 export interface Producto {
+  id: number;
   nombre: string;
   precio: number;
-  imagen?: string;
+  imagen: string;
   variantes?: Variante[];
 }
 

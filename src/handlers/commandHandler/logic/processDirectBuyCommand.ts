@@ -18,7 +18,8 @@ export function processDirectBuyCommand(
           `💰 Precio: $${producto.precio.toFixed(2).replace('.', ',')}\n` +
           `🏷️ Categoría: ${producto.categoria}\n\n` +
           `*¿Cuántas unidades deseas añadir al carrito?*\n` +
-          `Responde con un número (ejemplo: 2)`,
+          `Responde con un número (ejemplo: 2)\n\n` +
+          `❌ O escribe *cancelar* para salir sin agregar el producto.`,
         stateUpdates: {
           lastCategory: 'solicitar_cantidad',
           productoSeleccionado: producto,

@@ -16,7 +16,7 @@ export function generarListaProductosNumeradosLogic(
       const precioFormateado = producto.precio.toFixed(2).replace(".", ",");
 
       if (producto.variantes && producto.variantes.length > 0) {
-        mensaje += `- ${prodNumber} ${producto.nombre}: $${precioFormateado}\n`;
+        mensaje += `- ${prodNumber} ${producto.nombre} (ID: ${producto.id}): $${precioFormateado}\n`;
 
         producto.variantes.forEach((variante, varIndex) => {
           const varNumber = `${prodNumber}.${varIndex + 1}`;
@@ -28,7 +28,7 @@ export function generarListaProductosNumeradosLogic(
 
         mensaje += `  → Para ordenar, escribe: *${catNumber}* o *${prodNumber}* o *${prodNumber}.1*\n`;
       } else {
-        mensaje += `- ${prodNumber} ${producto.nombre}: $${precioFormateado}\n`;
+        mensaje += `- ${prodNumber} ${producto.nombre} (ID: ${producto.id}): $${precioFormateado}\n`;
       }
     });
     mensaje += "\n";
