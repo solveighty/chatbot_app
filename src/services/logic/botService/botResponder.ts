@@ -46,8 +46,8 @@ export class BotResponder {
       return productPurchaseResponse;
     }
 
-    // Handle checkout - si el mensaje contiene "finalizar compra" o si el usuario está en estado de checkout
-    if (userMessageLower.includes('finalizar compra') || 
+    // Handle checkout - si el mensaje contiene "finalizar" o si el usuario está en estado de checkout
+    if (userMessageLower.includes('finalizar') || 
         (state && (state.lastCategory === 'solicitar_nombre_checkout' || 
                    state.lastCategory === 'solicitar_cedula_checkout' || 
                    state.lastCategory === 'solicitar_telefono_checkout' || 

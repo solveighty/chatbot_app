@@ -48,8 +48,8 @@ export class CommandHandler {
       return getCartSummary(this.cartService, userId);
     }
     
-    // para finalizar compra
-    if (messageLower === 'finalizar compra') {
+    // para finalizar
+if (messageLower === 'finalizar') {
       return processCheckout(this.cartService, userId);
     }
     

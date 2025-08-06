@@ -14,7 +14,7 @@ export function processCheckout(
 
   return {
     response:
-      `🛒 *Finalizar Compra*\n\n` +
+      `🛒 *Finalizar*\n\n` +
       `📝 *Para procesar tu pedido, necesito algunos datos:*\n\n` +
       `👤 *Por favor, escribe tu nombre completo:*\n\n` +
       `❌ O escribe *cancelar* para salir sin finalizar la compra.`,

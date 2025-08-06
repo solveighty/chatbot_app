@@ -90,7 +90,7 @@ export class ProductPurchaseHandler {
              `📦 *Cantidad:* ${cantidad} unidad${cantidad > 1 ? 'es' : ''}\n` +
              `💵 *Subtotal:* $${total}\n\n` +
              `🛒 Escribe *carrito* para ver tu carrito.\n` +
-             `💳 Escribe *finalizar compra* para completar tu pedido.\n` +
+             `💳 Escribe *finalizar* para completar tu pedido.\n` +
              `📋 Escribe *productos* para seguir comprando.`;
     } catch (error) {
       console.error('Error al agregar producto al carrito:', error);

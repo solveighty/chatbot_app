@@ -49,7 +49,7 @@ export class CantidadHandler {
              `🏷️ Categoría: ${producto.categoria}\n\n` +
              `🛒 Escribe *carrito* para ver todos los productos seleccionados.\n` +
              `➕ Puedes seguir añadiendo más productos escribiendo *quiero comprar [producto]*.\n` +
-             `✅ Cuando termines, escribe *finalizar compra* para proceder al pago.`;
+             `✅ Cuando termines, escribe *finalizar* para proceder al pago.`;
     } else {
       return `Lo siento, ha ocurrido un error. Por favor, intenta seleccionar el producto nuevamente.`;
     }

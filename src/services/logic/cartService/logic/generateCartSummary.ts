@@ -25,7 +25,7 @@ export function generateCartSummaryLogic(userId: string, cart: CartItem[]): stri
     "➕ *añadir [código]* - Ejemplo: añadir 1.2\n" +
     "➕ *añadir [cantidad] [código]* - Ejemplo: añadir 3 1.2\n" +
     "➖ *quitar [número]* - Quitar un producto\n" +
-    "✅ *finalizar compra* - Proceder al pago\n" +
+    "✅ *finalizar* - Proceder al pago\n" +
     "❌ *vaciar carrito* - Cancelar la compra";
 
   return mensaje;

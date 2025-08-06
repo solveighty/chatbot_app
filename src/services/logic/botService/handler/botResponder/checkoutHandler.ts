@@ -59,7 +59,7 @@ export class CheckoutHandler {
       timestamp: new Date()
     });
 
-    return `🛒 *Finalizar Compra*\n\n` +
+    return `🛒 *Finalizar*\n\n` +
            `📝 *Para procesar tu pedido, necesito algunos datos:*\n\n` +
            `👤 *Por favor, escribe tu nombre completo:*\n\n` +
            `❌ O escribe *cancelar* para salir sin finalizar la compra.`;
@@ -79,7 +79,7 @@ export class CheckoutHandler {
              `No se finalizó la compra.\n\n` +
              `🛒 Escribe *carrito* para ver tu carrito actual.\n` +
              `📋 Escribe *productos* para ver el catálogo completo.\n` +
-             `💳 Escribe *finalizar compra* cuando estés listo.`;
+             `�� Escribe *finalizar* cuando estés listo.`;
     }
 
     if (userMessage.trim().length < 3) {
@@ -114,7 +114,7 @@ export class CheckoutHandler {
              `No se finalizó la compra.\n\n` +
              `🛒 Escribe *carrito* para ver tu carrito actual.\n` +
              `📋 Escribe *productos* para ver el catálogo completo.\n` +
-             `💳 Escribe *finalizar compra* cuando estés listo.`;
+             `💳 Escribe *finalizar* cuando estés listo.`;
     }
 
     const cedula = userMessage.trim();
@@ -152,7 +152,7 @@ export class CheckoutHandler {
              `No se finalizó la compra.\n\n` +
              `🛒 Escribe *carrito* para ver tu carrito actual.\n` +
              `📋 Escribe *productos* para ver el catálogo completo.\n` +
-             `💳 Escribe *finalizar compra* cuando estés listo.`;
+             `💳 Escribe *finalizar* cuando estés listo.`;
     }
 
     const telefono = userMessage.trim();
@@ -192,7 +192,7 @@ export class CheckoutHandler {
              `No se finalizó la compra.\n\n` +
              `🛒 Escribe *carrito* para ver tu carrito actual.\n` +
              `📋 Escribe *productos* para ver el catálogo completo.\n` +
-             `💳 Escribe *finalizar compra* cuando estés listo.`;
+             `�� Escribe *finalizar* cuando estés listo.`;
     }
 
     // Verificar si el usuario quiere retirar en el monasterio

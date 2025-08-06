@@ -24,7 +24,7 @@ export class CarritoHandler {
       const total = this.cartService.getCartTotal(userId);
       respuesta += `💰 *Total: $${total.toFixed(2).replace('.', ',')}*\n\n`;
       respuesta += '✏️ Para eliminar un producto, escribe: *eliminar [nombre del producto]*\n';
-      respuesta += '✅ Para finalizar tu compra, escribe: *finalizar compra*';
+      respuesta += '✅ Para finalizar tu compra, escribe: *finalizar*';
 
       return respuesta;
     }

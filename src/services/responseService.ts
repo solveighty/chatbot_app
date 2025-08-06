@@ -88,7 +88,7 @@ export class ResponseService implements IResponseService {
 • \`limpiar\` - Vaciar carrito
 
 🛒 *Compras:*
-• \`comprar\` - Finalizar compra
+• \`finalizar\` - Finalizar compra
 • \`cancelar\` - Cancelar proceso
 
 📞 *Servicios:*

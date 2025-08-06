@@ -42,7 +42,7 @@ export function generarListaProductosNumeradosLogic(
   mensaje += "3. Indica la cantidad de unidades que deseas cuando se te pregunte.\n";
   mensaje += "4. Puedes agregar varios productos a tu carrito.\n";
   mensaje += "5. Escribe *carrito* para ver tus productos seleccionados.\n";
-  mensaje += "6. Escribe *finalizar compra* cuando estés listo.\n\n";
+  mensaje += "6. Escribe *finalizar* cuando estés listo.\n\n";
   mensaje += "Para más ayuda, escribe: *ayuda*";
 
   return mensaje;

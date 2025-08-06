@@ -105,7 +105,7 @@ export class ProductService implements IProductService {
       "3. Indica la cantidad de unidades que deseas cuando se te pregunte.\n" +
       "4. Puedes agregar varios productos a tu carrito.\n" +
       "5. Escribe *carrito* para ver tus productos seleccionados.\n" +
-      "6. Escribe *finalizar compra* cuando estés listo.\n";
+      "6. Escribe *finalizar* cuando estés listo.\n";
     mensaje +=
       "\n🏛️ Para servicios: Escribe el nombre del servicio para obtener información de contacto.\n";
     mensaje += "\nPara más ayuda, escribe: *ayuda*";
