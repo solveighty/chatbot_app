@@ -1,6 +1,6 @@
 import { ProductService } from '../services/productService';
 import { CartService } from '../services/cartService';
-import { ConversationStateManager } from '../services/conversationStateManager';
+import { stateManager } from '../services/conversationStateManager';
 import { ResponseService } from '../services/responseService';
 import { OrderService } from '../services/orderService';
 import { ServiceService } from '../services/serviceService';
@@ -11,7 +11,6 @@ export function setupDependencies() {
   // Crear instancias de servicios
   const productService = new ProductService();
   const cartService = new CartService();
-  const stateManager = new ConversationStateManager();
   const responseService = new ResponseService();
   const serviceService = new ServiceService();
   const orderService = new OrderService(serviceService);
@@ -29,7 +28,6 @@ export function setupDependencies() {
     responseService,
     productService,
     cartService,
-    stateManager,
     commandHandler,
     orderService,
     serviceService

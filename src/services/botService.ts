@@ -1,4 +1,4 @@
-import { IProductService, ICartService, IConversationStateManager, IResponseService, IServiceService } from '../interfaces/services';
+import { IProductService, ICartService, IResponseService, IServiceService } from '../interfaces/services';
 import { BotResponder } from './logic/botService/botResponder';
 import { OrderService } from './orderService';
 import { CommandHandler } from '../handlers/commandHandler';
@@ -9,6 +9,7 @@ import { CheckoutHandler } from './logic/botService/handler/botResponder/checkou
 import { ImageHandler } from './logic/botService/handler/botResponder/imageHandler';
 import { RespuestaGenericaHandler } from './logic/botService/handler/botResponder/respuestaGenericaHandler';
 import { CompraHandler } from './logic/botService/handler/botResponder/compraHandler';
+import { stateManager } from './conversationStateManager';
 import logger from '../utils/logger';
 
 export class BotService {
@@ -19,7 +20,6 @@ export class BotService {
     private readonly responseService: IResponseService,
     private readonly productService: IProductService,
     private readonly cartService: ICartService,
-    private readonly stateManager: IConversationStateManager,
     private readonly commandHandler: CommandHandler,
     private readonly orderService: OrderService,
     private readonly serviceService: IServiceService

@@ -7,6 +7,7 @@ import { verificarRutasImagenes } from './utils/imageDebugger';
 import { InvoiceGenerator } from './utils/invoiceGenerator';
 import { startServer } from './api/server';
 import { MqttService } from './utils/mqttService';
+import { testSyncDetection } from './utils/syncTest';
 
 // Inicializar el cliente de WhatsApp y el servicio de bot
 async function initializeServices() {
@@ -24,6 +25,11 @@ async function initializeServices() {
         const { botService } = setupDependencies();
         const messageHandler = new MessageHandler(botService);
         const messageProcessor = (message: any) => messageHandler.handleMessage(message);
+        
+        // Probar sistema de detección de sincronización (solo en desarrollo)
+        if (process.env.NODE_ENV === 'development') {
+            testSyncDetection();
+        }
         
         // Iniciar cliente de WhatsApp
         const client = new WhatsAppClient(WHATSAPP_CLIENT_OPTIONS, messageProcessor);
