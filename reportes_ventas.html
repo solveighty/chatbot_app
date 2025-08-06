@@ -1173,7 +1173,7 @@
             <td>${order.orderId}</td>
             <td>${new Date(order.date).toLocaleString()}</td>
             <td>${order.clientName}</td>
-            <td>${order.cedula || ''}</td>
+            <td>${order.clientCedula || ''}</td>
             <td>${order.clientPhone}</td>
             <td class="text-right">${formatCurrency(order.total)}</td>
             <td>
@@ -1181,7 +1181,7 @@
             </td>
           </tr>
           <tr>
-            <td colspan="6" class="p-0">
+            <td colspan="7" class="p-0">
               <div id="order-details-${index}" class="order-details">
                 <div class="order-detail-header">
                   <h4>Detalle del Pedido: ${order.orderId}</h4>
@@ -1376,7 +1376,7 @@
                 ['Nº Pedido:', order.orderId],
                 ['Cliente:', order.clientName],
                 ['Teléfono:', order.clientPhone],
-                ['Cedula:', order.cedula],
+                ['Cedula:', order.clientCedula],
                 ['Fecha:', new Date(order.date).toLocaleString()],
                 [''],
                 ['PRODUCTOS'],
